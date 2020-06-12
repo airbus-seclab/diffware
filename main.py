@@ -131,7 +131,7 @@ def extract(file_path, unpacker, config, args):
     if file_path.is_dir():
         # Walk through folders and extract only the files they contain
         source_folder = file_path
-        for path in _walk(file_path, exclude, blacklist):
+        for path in _walk(file_path, exclude, exclude_mime):
             yield from _extract(path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth)
     else:
         # Regular files can just be extracted
