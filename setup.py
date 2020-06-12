@@ -15,6 +15,9 @@ def setup():
     if arguments.sort_order.lower() == "distance" and not arguments.compute_distance:
         raise ValueError("Order set to distance, but computing distance is disabled")
 
+    if arguments.min_dist >= 0 and not arguments.compute_distance:
+        raise ValueError("min_dist set, but computing distance is disabled")
+
     return arguments
 
 
@@ -37,7 +40,7 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("--no-specialize", action="store_false", dest="specialize", help="Do not use specific content comparison for known file types, but use simple binary data comparison", default=True)
     parser.add_argument("--no-distance", action="store_false", dest="compute_distance", help="Compute the distance between two modified files using TLSH", default=True)
     parser.add_argument("--order-by", dest="sort_order", help="Define the sort order for the output. Note: setting this to anything other than \"none\" will disable progressive output", choices=["none", "path", "distance"], default="none")
-    parser.add_argument("--enable-statistics", action="store_true", dest="statistics", help="Compute statistics or check for unpack data loss", default=None)
+    parser.add_argument("--min_dist", help="Ignore files with a difference lower than the one given (< 0 for no limit)", type=int, default=-1)
     parser.add_argument("--profile", action="store_true", help="Measure the number of calls and time spent in different methods", default=False)
 
     parser.add_argument("FILE_PATH_1", type=str, help="Path to first file")

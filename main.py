@@ -230,6 +230,10 @@ def compare_files(file_set1, file_set2, arguments):
         else:
             distance = None
 
+        if distance is not None and distance < arguments.min_dist:
+            # Ignore files that are too similar
+            continue
+
         edits.append((file1.path, file2.path, distance))
 
         # Start printing files if we can, so user doesn't have to wait too long
