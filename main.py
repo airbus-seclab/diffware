@@ -1,4 +1,9 @@
+#!/usr/bin/env python3
+"""
+Compare the contents of two files or directories
+"""
 import os
+import sys
 import shutil
 import logging
 import pathlib
@@ -6,12 +11,9 @@ import fnmatch
 import operator
 import itertools
 
-import sys
 sys.path.append("../fact_extractor/fact_extractor")
-
 from unpacker.unpack import Unpacker
 from helperFunctions.config import read_list_from_config
-
 
 import files
 from profiler import Profiler
