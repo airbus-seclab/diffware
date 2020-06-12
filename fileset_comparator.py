@@ -1,9 +1,8 @@
-import tlsh
 import operator
 import multiprocessing
 
 import files
-from utils import cached_property, get_file_type
+from utils import cached_property, get_file_type, compute_distance
 from profiler import Profiler
 from logger import Logger
 
@@ -99,13 +98,7 @@ class FilesetComparator(object):
     @staticmethod
     @Profiler.profilable
     def compute_distance(file1, file2):
-        """
-        Use tlsh to compute the distance between 2 files
-        """
-        try:
-            return tlsh.diff(file1.fuzzy_hash(), file2.fuzzy_hash())
-        except TypeError:
-            return None
+        return compute_distance(file1, file2)
 
     ### Internal methods
 

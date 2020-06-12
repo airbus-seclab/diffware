@@ -1,4 +1,7 @@
+import os
+import tlsh
 import pathlib
+import subprocess
 from functools import wraps
 from fact_helper_file import get_file_type_from_path
 
@@ -15,6 +18,32 @@ def get_file_type(path):
         return {"mime": "directory", "full": ""}
 
     return get_file_type_from_path(path)
+
+
+def compute_distance(file1, file2):
+    """
+    Use tlsh to compute the distance between 2 files
+    If it fails, revert to counting the number of different bytes
+    """
+    try:
+        return tlsh.diff(file1.fuzzy_hash(), file2.fuzzy_hash())
+    except TypeError:
+        # File is too small or doesn't have enough randomness
+        pass
+
+    # Compute the proportion of bytes changed
+    path1 = str(file1.path)
+    path2 = str(file2.path)
+    file_size = max(os.path.getsize(path1), os.path.getsize(path2))
+
+    try:
+        diff_bytes = subprocess.check_output(["cmp", "-l", path1, path2], stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError as e:
+        # When files are different, cmp has an exit code of 1
+        diff_bytes = e.output
+
+    diff = int(10 * len(diff_bytes) / max(1, file_size))
+    return diff
 
 
 def cached_property(func):
