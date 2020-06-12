@@ -24,14 +24,19 @@ from utils import get_file_type
 from setup import setup, get_config
 
 
-def is_excluded(file, exclude, blacklist):
+def is_excluded(file, exclude, exclude_mime):
     for pattern in exclude:
         if fnmatch.fnmatchcase(str(file), pattern):
             Logger.debug("Ignoring file {}".format(file))
             return True
 
-    mime_type = get_file_type(file)['mime']
-    return mime_type in blacklist
+    mime_type = get_file_type(file)["mime"]
+    for pattern in exclude_mime:
+        if fnmatch.fnmatchcase(mime_type, pattern):
+            Logger.debug("Ignoring file {} with mime-type {}".format(file, mime_type))
+            return True
+
+    return False
 
 
 def _copy_if_necessary(file_path, source_folder, destination_folder):
@@ -64,13 +69,13 @@ def _copy_if_necessary(file_path, source_folder, destination_folder):
         return file_path
 
 
-def _extract(file_path, unpacker, source_folder, data_folder, exclude, blacklist, max_depth, depth=0):
+def _extract(file_path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth, depth=0):
     """
     Assume file_path is not a directory, and either recursively extract its
     content, or return the plain file if there is nothing to extract
     """
     # Ignore unwanted files
-    if is_excluded(file_path, exclude, blacklist):
+    if is_excluded(file_path, exclude, exclude_mime):
         return
 
     if max_depth >= 0 and depth > max_depth:
@@ -87,7 +92,7 @@ def _extract(file_path, unpacker, source_folder, data_folder, exclude, blacklist
             # unpack already does the walk for us, so we can just call _extract
             # again
             extracted_count += 1
-            yield from _extract(path, unpacker, source_folder, data_folder, exclude, blacklist, max_depth, depth=depth + 1)
+            yield from _extract(path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth, depth=depth + 1)
 
     # If no files were extracted, at least return this file
     if extracted_count == 0:
@@ -95,7 +100,7 @@ def _extract(file_path, unpacker, source_folder, data_folder, exclude, blacklist
         yield files.generic.UnpackedFile(path, unpacker, data_folder)
 
 
-def _walk(file_path, exclude, blacklist):
+def _walk(file_path, exclude, exclude_mime):
     """
     Generator to walk the files included in a directory
     """
@@ -103,18 +108,19 @@ def _walk(file_path, exclude, blacklist):
         for name in files:
             file = pathlib.Path(root, name)
 
-            if not is_excluded(file, exclude, blacklist):
+            if not is_excluded(file, exclude, exclude_mime):
                 Logger.progress("Walking {}".format(file_path))
                 yield file
 
 
-def extract(file_path, unpacker, config, max_depth):
+def extract(file_path, unpacker, config, args):
     """
     Recursively extract the content of a file or folder
     """
     data_folder = config.get("unpack", "data_folder")
     exclude = read_list_from_config(config, "unpack", "exclude") or []
-    blacklist = read_list_from_config(config, "unpack", "blacklist") or []
+    exclude_mime = args.exclude_mime
+    max_depth = args.max_depth
 
     # Resolve symlinks and get absolute paths once so we don't run into
     # issues later on by attempting to resolve broken symlinks that were
@@ -126,26 +132,29 @@ def extract(file_path, unpacker, config, max_depth):
         # Walk through folders and extract only the files they contain
         source_folder = file_path
         for path in _walk(file_path, exclude, blacklist):
-            yield from _extract(path, unpacker, source_folder, data_folder, exclude, blacklist, max_depth)
+            yield from _extract(path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth)
     else:
         # Regular files can just be extracted
         source_folder = file_path.parent
-        yield from _extract(file_path, unpacker, source_folder, data_folder, exclude, blacklist, max_depth)
+        yield from _extract(file_path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth)
 
 
-def list_files(file_path, unpacker, config):
+def list_files(file_path, unpacker, config, args):
     """
     List all the files at the given path
     """
     exclude = read_list_from_config(config, "unpack", "exclude") or []
     blacklist = read_list_from_config(config, "unpack", "blacklist") or []
-    file_path = pathlib.Path(file_path).resolve()
+    exclude_mime = args.exclude_mime
+
+    if is_excluded(file_path, exclude, exclude_mime):
+        return
 
     if file_path.is_dir():
         data_folder = file_path
-        for path in _walk(file_path, exclude, blacklist):
+        for path in _walk(file_path, exclude, exclude_mime):
             yield files.generic.UnpackedFile(path, unpacker, data_folder)
-    elif not is_excluded(file_path, exclude, blacklist):
+    else:
         data_folder = file_path.parent
         yield files.generic.UnpackedFile(file_path, unpacker, data_folder)
 
@@ -161,14 +170,14 @@ def get_extracted_files(file_path1, file_path2, arguments):
     unpacker2 = Unpacker(config=config2, exclude=arguments.exclude)
 
     if arguments.extract:
-        files1 = extract(file_path1, unpacker1, config1, arguments.max_depth)
-        files2 = extract(file_path2, unpacker2, config2, arguments.max_depth)
+        files1 = extract(file_path1, unpacker1, config1, arguments)
+        files2 = extract(file_path2, unpacker2, config2, arguments)
 
         data_folder_1 = "/tmp/extractor1"
         data_folder_2 = "/tmp/extractor2"
     else:
-        files1 = list_files(file_path1, unpacker1, config1)
-        files2 = list_files(file_path2, unpacker2, config2)
+        files1 = list_files(file_path1, unpacker1, config1, arguments)
+        files2 = list_files(file_path2, unpacker2, config2, arguments)
 
         data_folder_1 = file_path1 if file_path1.is_dir() else file_path1.parent
         data_folder_2 = file_path2 if file_path2.is_dir() else file_path2.parent

@@ -10,6 +10,10 @@ def get_file_type(path):
     if path.is_symlink():
         return {"mime": "inode/symlink", "full": ""}
 
+    # get_file_type_from_path would raise IsADirectoryError
+    if path.is_dir():
+        return {"mime": "directory", "full": ""}
+
     return get_file_type_from_path(path)
 
 
