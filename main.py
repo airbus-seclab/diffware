@@ -126,7 +126,6 @@ def extract(file_path, unpacker, config, args):
     # issues later on by attempting to resolve broken symlinks that were
     # extracted
     data_folder = pathlib.Path(data_folder, "files").resolve()
-    file_path = pathlib.Path(file_path).resolve()
 
     if file_path.is_dir():
         # Walk through folders and extract only the files they contain
@@ -160,8 +159,8 @@ def list_files(file_path, unpacker, config, args):
 
 
 def get_extracted_files(file_path1, file_path2, arguments):
-    file_path1 = pathlib.Path(file_path1)
-    file_path2 = pathlib.Path(file_path2)
+    file_path1 = pathlib.Path(file_path1).resolve()
+    file_path2 = pathlib.Path(file_path2).resolve()
 
     config1 = get_config(arguments, "data_folder_1", "/tmp/extractor1")
     unpacker1 = Unpacker(config=config1, exclude=arguments.exclude)
