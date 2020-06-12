@@ -109,7 +109,7 @@ def _walk(file_path, exclude, exclude_mime):
             file = pathlib.Path(root, name)
 
             if not is_excluded(file, exclude, exclude_mime):
-                Logger.progress("Walking {}".format(file_path))
+                Logger.progress("Walking {}".format(file))
                 yield file
 
 
