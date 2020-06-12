@@ -107,8 +107,6 @@ def copy_files(pairs, tmp1, tmp2):
 def call_diffoscope(dir1, dir2, args):
     cmd = ["python3", DIFFOSCOPE_PATH, dir1.name, dir2.name, *args]
     subprocess.run(cmd)
-    import time
-    time.sleep(3600)
 
 
 if __name__ == "__main__":
