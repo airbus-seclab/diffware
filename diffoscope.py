@@ -47,7 +47,7 @@ def _get_pair(lines):
 
 
 def _parse_diff(diff):
-    lines = diff.split("\n")
+    lines = diff.strip().split("\n")
     return _get_pair(lines)
 
 
