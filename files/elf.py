@@ -18,8 +18,10 @@ class ElfSection:
         self.name = section_name
         self.path = path
 
-        path_dir = re.escape(os.path.dirname(self.path).encode("utf-8"))
-        path = re.escape(self.path.encode("utf-8"))
+    @classmethod
+    def _init_regex(self, path):
+        path_dir = re.escape(os.path.dirname(path).encode("utf-8"))
+        path = re.escape(path.encode("utf-8"))
 
         # Match the directory containing the file
         self._dir_re = re.compile(
@@ -30,22 +32,36 @@ class ElfSection:
         # Match hex offset
         self._offset_re = re.compile(rb"offset 0x[0-9a-f]+")
 
+    @classmethod
     def _cmd_options(self):
-        return ["--decompress", "--hex-dump"]
+        return ["--decompress"]
 
-    def _cmd(self, file):
-        return ["readelf", *self._cmd_options(),self.name, file]
+    @classmethod
+    def _cmd(self, sections, file):
+        cmd = self._cmd_options()
 
+        # Join all section names together to dump all at once
+        for section in sections:
+            cmd += ["--hex-dump", section.name]
+
+        return ["readelf", *cmd, file]
+
+    @classmethod
     @Profiler.profilable
-    def analyze(self, file, stdout):
+    def analyze(self, sections, file):
+        self._init_regex(file)
+        cmd = self._cmd(sections, file)
+
+        Logger.debug("Running command {}".format(" ".join(cmd)))
         self._process = subprocess.run(
-            self._cmd(file),
+            cmd,
             shell=False,
             close_fds=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL
         )
 
+    @classmethod
     def _filter(self, line):
         # The full path can appear in the output, we need to remove it
         line = self._path_re.sub(b"/file", line)
@@ -54,8 +70,8 @@ class ElfSection:
         # real modifications in behavior
         return self._offset_re.sub(b"offset 0x", line)
 
-    @Profiler.profilable
-    def read(self):
+    @classmethod
+    def _read(self):
         for line in self._process.stdout.splitlines(True):
             yield self._filter(line)
 
@@ -74,22 +90,30 @@ class ElfCodeSection(ElfSection):
         # "lea  0x111cb4 (%rip),%rsi     # 12a012 <_fini+0xc4>"
         self._pointer_regex = re.compile(rb'\b(0x[0-9a-f]+)\b(?=.*\<\S+\>)')
 
+    @classmethod
+    def _init_regex(self, path):
+        pass
+
+    @classmethod
     def _cmd_options(self):
-        return ["--line-numbers", "--disassemble", "--demangle", "--reloc", "--no-show-raw-insn"]
+        return ["--disassemble", "--demangle", "--reloc", "--no-show-raw-insn"]
 
-    def _cmd(self, file):
-        return ["objdump", *self._cmd_options(), "--section", self.name, file]
+    @classmethod
+    def _cmd(self, sections, file):
+        cmd = self._cmd_options()
 
+        # Join all section names together to dump all at once
+        for section in sections:
+            cmd += ["-j", section.name]
+
+        return ["readelf", *cmd, file]
+
+    @classmethod
     def _filter(self, line):
         line = super()._filter(line)
         line = self._line_regex.sub(b"", line)
         line = self._resolved_regex.sub(b"", line)
         return self._pointer_regex.sub(b"0x ", line)
-
-
-class ElfStringSection(ElfSection):
-    def _cmd_options(self):
-        return ["--decompress", "--string-dump"]
 
 
 class ElfFile(UnpackedFile):
@@ -108,8 +132,6 @@ class ElfFile(UnpackedFile):
         ".init_array",
         ".fini",
         ".fini_array",
-        ".ctors",
-        ".dtors",
         # Special names for sections with errors
         "<no-strings>",
         "<corrupt>"
@@ -117,8 +139,8 @@ class ElfFile(UnpackedFile):
 
     SECTION_FLAG_MAPPING = {
         "X": ElfCodeSection,
-        "S": ElfStringSection,
-        "_": ElfSection,
+        "S": ElfSection,
+        "_": ElfSection
     }
 
     @cached_property
@@ -128,17 +150,23 @@ class ElfFile(UnpackedFile):
         tmp_file_path = FileComparator.tmp_file_path()
         absolute_path = self.path.absolute().as_posix()
 
-        self._sections = None
+        self._code_sections = []
+        self._data_sections = []
         self._load_sections(absolute_path)
 
         # If there were no sections, default to comparing the whole file
-        if not self._sections:
+        if not self._code_sections and not self._data_sections:
             return self.path
 
         with open(tmp_file_path, "wb") as tmp:
-            for section in self._sections.values():
-                section.analyze(absolute_path, tmp)
-                for line in section.read():
+            if self._data_sections:
+                ElfSection.analyze(self._data_sections, absolute_path)
+                for line in ElfSection._read():
+                    tmp.write(line)
+
+            if self._code_sections:
+                ElfCodeSection.analyze(self._code_sections, absolute_path)
+                for line in ElfCodeSection._read():
                     tmp.write(line)
 
         return tmp_file_path
@@ -189,7 +217,10 @@ class ElfFile(UnpackedFile):
                     if x in self.SECTION_FLAG_MAPPING
                 ][0]
 
-                self._sections[name] = elf_class(file, name)
+                if issubclass(elf_class, ElfCodeSection):
+                    self._code_sections.append(elf_class(file, name))
+                else:
+                    self._data_sections.append(elf_class(file, name))
         except Exception as e:
             Logger.error("error in _load_sections", e)
             pass
