@@ -82,13 +82,14 @@ class FilesetComparator(object):
         Use files' fuzzy hash to identify those that were moved
         """
         moved = []
+        files = list(self._get_missing_files())
 
         with multiprocessing.Pool(self.jobs) as pool:
-             matched = pool.map(self._match_file, self._get_missing_files())
+             matched = pool.map(self._match_file, files)
 
         for i in range(len(matched)):
             if matched[i] is not None:
-                file = self._get_missing_files()[i]
+                file = files[i]
                 moved.append((file, matched[i]))
 
         return moved
