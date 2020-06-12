@@ -42,8 +42,10 @@ def compute_distance(file1, file2):
         # When files are different, cmp has an exit code of 1
         diff_bytes = e.output
 
+    # Diff is size of output, multiplied by a constant to be the same order of
+    # magnitude as TLSH's distance, and set at a min value of 1
     diff = int(10 * len(diff_bytes) / max(1, file_size))
-    return diff
+    return max(diff, 1)
 
 
 def cached_property(func):
