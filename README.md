@@ -54,3 +54,14 @@ optional arguments:
 ## Optimizing
 
 For faster analysis, first extract all the necessary files, and then use the `--no-extract` and `--no-specialize` options
+
+You should also try to exclude as many files as possible, either based on their mime-type:
+
+```
+--exclude-mime audio/* --exclude-mime image/* --exclude-mime video/*
+```
+
+... or based on their path:
+```
+--exclude */build/* --exclude *.txt --exclude *.json
+```
