@@ -1,12 +1,11 @@
 import tlsh
-from logger import Logger
 import operator
-
-from fact_helper_file import get_file_type_from_path
+import multiprocessing
 
 import files
-from utils import cached_property
+from utils import cached_property, get_file_type
 from profiler import Profiler
+from logger import Logger
 
 
 class FilesetComparator(object):
@@ -15,11 +14,12 @@ class FilesetComparator(object):
     renamed files...
     """
     @Profiler.profilable
-    def __init__(self, files1, files2, specialize_enabled=True):
+    def __init__(self, files1, files2, specialize_enabled=True, jobs=None):
         # Converting to set triggers the call to the generators
         self.file_set1 = set(files1)
         self.file_set2 = set(files2)
         self.specialize_enabled = specialize_enabled
+        self.jobs = jobs or multiprocessing.cpu_count()
 
     ### Accessible properties
 
@@ -33,8 +33,20 @@ class FilesetComparator(object):
             len(self.file_set2)
         ))
         common_count = len(self._get_common_files())
+        Logger.debug("{} files in common".format(
+            common_count,
+        ))
+
         new_count = len(self._get_new_files())
+        Logger.debug("{} new files".format(
+            new_count,
+        ))
+
         missing_count = len(self._get_missing_files())
+        Logger.debug("{} missing files".format(
+            missing_count,
+        ))
+
         moved_count = len(self.get_moved_file_pairs())
         Logger.debug("Found {} files in common, {} moved files, {} new files and {} missing files\n".format(
             common_count,
@@ -71,10 +83,13 @@ class FilesetComparator(object):
         """
         moved = []
 
-        for file in self._get_missing_files():
-            matched = self._match_file(file, self._get_new_files())
-            if matched is not None:
-                moved.append((file, matched))
+        with multiprocessing.Pool(self.jobs) as pool:
+             matched = pool.map(self._match_file, self._get_missing_files())
+
+        for i in range(len(matched)):
+            if matched[i] is not None:
+                file = self._get_missing_files()[i]
+                moved.append((file, matched[i]))
 
         return moved
 
@@ -116,6 +131,7 @@ class FilesetComparator(object):
         """
         Return files with the same paths in both sets
         """
+        Logger.progress("Finding files in common...")
         # Order is important: this will return objects from file_set1
         return set.intersection(
             self.file_set2,
@@ -128,6 +144,7 @@ class FilesetComparator(object):
         """
         Return files which exist in the first set but not the second
         """
+        Logger.progress("Finding missing files...")
         return self.file_set1 - self._get_common_files()
 
     @cached_property
@@ -136,15 +153,21 @@ class FilesetComparator(object):
         """
         Return files which exist in the second set but not the first
         """
+        Logger.progress("Finding new files...")
         return self.file_set2 - self._get_common_files()
 
-    def _match_file(self, file, file_set):
+    def _match_file(self, file, file_set=None):
         """
         Match the given file with another file from the given set, if they
         are similar enough
         """
+        Logger.progress("Looking for moved {}...".format(file.path))
+
         if file.fuzzy_hash() is None:
             return None
+
+        if file_set is None:
+            file_set = self._get_new_files()
 
         comparisons = []
         for f in file_set:
@@ -171,7 +194,7 @@ class FilesetComparator(object):
         if not self.specialize_enabled:
             return file
 
-        file_type = get_file_type_from_path(file.path)
+        file_type = get_file_type(file.path)
 
         for file_class in files.FILE_TYPES:
             if file_class.recognizes(file_type):

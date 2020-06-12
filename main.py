@@ -188,7 +188,6 @@ def get_extracted_files(file_path1, file_path2, arguments):
         data_folder_2
     ))
 
-
     return files1, files2
 
 
@@ -209,7 +208,7 @@ def output_change(edit, arguments):
 
 
 def compare_files(file_set1, file_set2, arguments):
-    comparator = FilesetComparator(files1, files2, arguments.specialize)
+    comparator = FilesetComparator(files1, files2, arguments.specialize, arguments.jobs)
     pairs = comparator.get_files_to_compare()
 
     # When sorting , every value has to be computed before starting printing
@@ -254,12 +253,12 @@ def compare_files(file_set1, file_set2, arguments):
     added_count = 0
     for added in comparator.get_added_files():
         added_count += 1
-        Logger.output("Added: {}\n".format(added.path))
+        Logger.output("\nAdded: {}".format(added.path))
 
     removed_count = 0
     for removed in comparator.get_removed_files():
         removed_count += 1
-        Logger.output("Removed: {}\n".format(removed.path))
+        Logger.output("\nRemoved: {}".format(removed.path))
 
     # Print overall statistics
     Logger.info("Found {} added files, {} removed files and {} changed files".format(

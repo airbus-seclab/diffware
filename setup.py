@@ -18,6 +18,9 @@ def setup():
     if arguments.min_dist >= 0 and not arguments.compute_distance:
         raise ValueError("min_dist set, but computing distance is disabled")
 
+    if arguments.jobs is not None and arguments.jobs <= 0:
+        raise ValueError("Number of jobs must be > 0")
+
     return arguments
 
 
@@ -31,7 +34,8 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("-o", "--output", dest="data_file", help="Path to file in which to write the list of files (- for stdout)", default="-")
     parser.add_argument("-L", "--log_level", help="Define the log level", choices=["DEBUG", "INFO", "WARNING", "ERROR"], default="INFO")
     parser.add_argument("-d", "--debug", action="store_true", help="Print debug messages", default=False)
-    parser.add_argument("-C", "--config_file", help="set path to config File", default=default_config_path())
+    parser.add_argument("-C", "--config_file", help="Set path to config File", default=default_config_path())
+    parser.add_argument("-j", "--jobs", help="Number of job to run in parallel (default to number of cpus)", type=int, default=None)
     parser.add_argument("--exclude", metavar="GLOB_PATTERN", action="append", help="Exclude files paths that match %(metavar)s.", default=["error/*", "inode/chardevice"])
     parser.add_argument("--exclude-mime", dest="exclude_mime", metavar="GLOB_PATTERN", action="append", help="Exclude files with mime types that match %(metavar)s.", default=[])
     parser.add_argument("--blacklist", metavar="MIME_TYPE", action="append", help="Exclude files with %(metavar)s.", default=[])
