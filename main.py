@@ -218,6 +218,8 @@ def compare_files(file_set1, file_set2, arguments):
         delay_output = True
 
     # Print info about the files that were modified
+    Logger.progress("Computing distances for modified files...")
+
     edits = []
     for file1, file2 in pairs:
         if FileComparator.are_equal(file1, file2):
