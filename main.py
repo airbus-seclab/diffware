@@ -123,7 +123,7 @@ def extract(file_path, unpacker, config, max_depth):
     if file_path.is_dir():
         # Walk through folders and extract only the files they contain
         source_folder = file_path
-        for path in _walk(file_path, exclude):
+        for path in _walk(file_path, exclude, blacklist):
             yield from _extract(path, unpacker, source_folder, data_folder, exclude, blacklist, max_depth)
     else:
         # Regular files can just be extracted
@@ -149,6 +149,9 @@ def list_files(file_path, unpacker, config):
 
 
 def get_extracted_files(file_path1, file_path2, arguments):
+    file_path1 = pathlib.Path(file_path1)
+    file_path2 = pathlib.Path(file_path2)
+
     config1 = get_config(arguments, "data_folder_1", "/tmp/extractor1")
     unpacker1 = Unpacker(config=config1, exclude=arguments.exclude)
 
@@ -158,9 +161,22 @@ def get_extracted_files(file_path1, file_path2, arguments):
     if arguments.extract:
         files1 = extract(file_path1, unpacker1, config1, arguments.max_depth)
         files2 = extract(file_path2, unpacker2, config2, arguments.max_depth)
+
+        data_folder_1 = "/tmp/extractor1"
+        data_folder_2 = "/tmp/extractor2"
     else:
         files1 = list_files(file_path1, unpacker1, config1)
         files2 = list_files(file_path2, unpacker2, config2)
+
+        data_folder_1 = file_path1 if file_path1.is_dir() else file_path1.parent
+        data_folder_2 = file_path2 if file_path2.is_dir() else file_path2.parent
+
+    # Print info about the compared files
+    Logger.output("Directory1: {}\nDirectory2: {}".format(
+        data_folder_1,
+        data_folder_2
+    ))
+
 
     return files1, files2
 
@@ -169,13 +185,13 @@ def output_change(edit, arguments):
     path1, path2, distance = edit
 
     if arguments.compute_distance:
-        Logger.output("File1: {}\nFile2: {}\nDistance: {}\n".format(
+        Logger.output("\nFile1: {}\nFile2: {}\nDistance: {}".format(
             path1,
             path2,
             distance
         ))
     else:
-        Logger.output("File1: {}\nFile2: {}\nDistance: {}\n".format(
+        Logger.output("\nFile1: {}\nFile2: {}".format(
             path1,
             path2
         ))
