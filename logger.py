@@ -95,6 +95,11 @@ class Logger():
     @staticmethod
     def progress(string):
         # Make string take up exactly full width
-        max_size = os.get_terminal_size()[0]
+        try:
+            max_size = os.get_terminal_size()[0]
+        except OSError:
+            # Probably redirecting output to file or process
+            max_size = 128
+
         format = "\33[90m{:<" + str(max_size) + "." + str(max_size) + "}\033[0m"
         print(format.format(string), end="\r")
