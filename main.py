@@ -70,16 +70,26 @@ def _copy_if_necessary(file_path, source_folder, destination_folder):
         return file_path
 
 
-def _extract(file_path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth, depth=0):
+def _delete_if_necessary(file_path, source_folder):
+    """
+    Delete the given file, if it's not in the source_folder
+    """
+    if str(source_folder) in file_path.parents:
+        return
+
+    os.remove(file_path)
+
+
+def _extract(file_path, unpacker, config, depth=0):
     """
     Assume file_path is not a directory, and either recursively extract its
     content, or return the plain file if there is nothing to extract
     """
     # Ignore unwanted files
-    if is_excluded(file_path, exclude, exclude_mime):
+    if is_excluded(file_path, config.exclude, config.exclude_mime):
         return
 
-    if max_depth >= 0 and depth > max_depth:
+    if config.max_depth >= 0 and depth > config.max_depth:
         Logger.info("Not unpacking {} because max recursion depth has been reached".format(file_path))
         return
     else:
@@ -87,21 +97,37 @@ def _extract(file_path, unpacker, source_folder, data_folder, exclude, exclude_m
 
     extracted_count = 0
 
+    # Update the "_file_folder" value from the unpacker so fact_extractor
+    # doesn't extract in the root output folder, making everything
+    # messy and breaking the original hierachy
+    try:
+        relative_path = file_path.relative_to(config.data_folder)
+        extract_folder = pathlib.Path(config.data_folder, relative_path.parent)
+    except ValueError:
+        # This file is still in the source_folder, so no need to bother
+        extract_folder = config.data_folder
+
+    unpacker._file_folder = extract_folder
+
     # Symlinks should be copied as text files containing their target
     if not file_path.is_symlink():
-        for path in unpacker.unpack(file_path, exclude):
+        for path in unpacker.unpack(file_path, config.exclude):
             # unpack already does the walk for us, so we can just call _extract
             # again
             extracted_count += 1
-            yield from _extract(path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth, depth=depth + 1)
+            yield from _extract(path, unpacker, config, depth=depth + 1)
 
-    # If no files were extracted, at least return this file
     if extracted_count == 0:
-        path = _copy_if_necessary(file_path, source_folder, data_folder)
-        yield files.generic.UnpackedFile(path, unpacker, data_folder)
+        # If no files were extracted, at least return this file
+        # _copy_if_necessary takes care of handling symlinks
+        path = _copy_if_necessary(file_path, config.source_folder, config.data_folder)
+        yield files.generic.UnpackedFile(path, unpacker, config.data_folder)
+    else:
+        # Since the content was extracted, we can delete this file
+        _delete_if_necessary(file_path, config.source_folder)
 
 
-def _walk(file_path, exclude, exclude_mime):
+def _walk(file_path, config):
     """
     Generator to walk the files included in a directory
     """
@@ -109,7 +135,7 @@ def _walk(file_path, exclude, exclude_mime):
         for name in files:
             file = pathlib.Path(root, name)
 
-            if not is_excluded(file, exclude, exclude_mime):
+            if not is_excluded(file, config.exclude, config.exclude_mime):
                 Logger.progress("Walking {}".format(file))
                 yield file
 
@@ -130,13 +156,15 @@ def extract(file_path, unpacker, config):
 
     if file_path.is_dir():
         # Walk through folders and extract only the files they contain
-        source_folder = file_path
+        config.source_folder = file_path
+        config.data_folder = data_folder
         for path in _walk(file_path, exclude, exclude_mime):
-            yield from _extract(path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth)
+            yield from _extract(path, unpacker, config)
     else:
         # Regular files can just be extracted
-        source_folder = file_path.parent
-        yield from _extract(file_path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth)
+        config.source_folder = file_path.parent
+        config.data_folder = data_folder
+        yield from _extract(file_path, unpacker, config)
 
 
 def list_files(file_path, unpacker, config):
