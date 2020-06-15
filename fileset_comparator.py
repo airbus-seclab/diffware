@@ -13,12 +13,11 @@ class FilesetComparator(object):
     renamed files...
     """
     @Profiler.profilable
-    def __init__(self, files1, files2, specialize_enabled=True, jobs=None):
+    def __init__(self, files1, files2, config):
         # Converting to set triggers the call to the generators
         self.file_set1 = set(files1)
         self.file_set2 = set(files2)
-        self.specialize_enabled = specialize_enabled
-        self.jobs = jobs or multiprocessing.cpu_count()
+        self.config = config
 
     ### Accessible properties
 
@@ -80,10 +79,13 @@ class FilesetComparator(object):
         """
         Use files' fuzzy hash to identify those that were moved
         """
+        if self.config.fuzzy_threshold <= 0:
+            return []
+
         moved = []
         files = list(self._get_missing_files())
 
-        with multiprocessing.Pool(self.jobs) as pool:
+        with multiprocessing.Pool(self.config.jobs) as pool:
              matched = pool.map(self._match_file, files)
 
         for i in range(len(matched)):
@@ -176,7 +178,7 @@ class FilesetComparator(object):
 
         comparisons.sort(key=operator.itemgetter(0))
         best_score, closest_file = comparisons[0]
-        if best_score < 70:
+        if best_score < self.config.fuzzy_threshold:
             return closest_file
 
         return None
@@ -185,7 +187,7 @@ class FilesetComparator(object):
         """
         Finds the best class to represent the given file and casts the instance
         """
-        if not self.specialize_enabled:
+        if not self.config.specialize:
             return file
 
         file_type = get_file_type(file.path)
