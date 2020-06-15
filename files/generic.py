@@ -39,7 +39,10 @@ class UnpackedFile(object):
         return hash(self.relative_path())
 
     @classmethod
-    def recognizes(self, file_type):
+    def recognizes(self, file_type: dict):
+        """
+        Whether this class can be used to analyze files with the given type
+        """
         return self.recognize_regex.match(file_type["full"])
 
     @cached_property

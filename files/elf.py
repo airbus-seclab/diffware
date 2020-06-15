@@ -31,8 +31,8 @@ class ElfAnalyzer(Analyzer):
             self.data_sections.append(section_name)
 
     def run(self):
-        section_output = ElfSectionCommand.run(self.data_sections, self.path)
-        code_output = ElfCodeSectionCommand.run(self.code_sections, self.path)
+        section_output = ElfSectionCommand.run(self.path, self.data_sections)
+        code_output = ElfCodeSectionCommand.run(self.path, self.code_sections)
         return itertools.chain(section_output, code_output)
 
 
@@ -60,7 +60,7 @@ class ElfSectionCommand(Command):
         return ["--decompress"]
 
     @classmethod
-    def make_cmd(self, sections, file):
+    def make_cmd(self, file, sections):
         # Don't run a command if there are no sections
         if not sections:
             return
@@ -98,7 +98,7 @@ class ElfCodeSectionCommand(Command):
         return ["--disassemble", "--demangle", "--reloc", "--no-show-raw-insn"]
 
     @classmethod
-    def make_cmd(self, sections, file):
+    def make_cmd(self, file, sections):
         # Don't run a command if there are no sections
         if not sections:
             return

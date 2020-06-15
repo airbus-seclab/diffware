@@ -63,12 +63,12 @@ class Command:
 
     @classmethod
     @Profiler.profilable
-    def run(self, sections, file):
+    def run(self, file, *args, **kwargs):
         """
         Run this command and return a generator of filtered output lines
         """
         regex = self.make_regex(file)
-        cmd = self.make_cmd(sections, file)
+        cmd = self.make_cmd(file, *args, **kwargs)
 
         # Handle empty commands to save some time
         if cmd is None:
