@@ -30,6 +30,7 @@ class FilesetComparator(object):
             len(self.file_set1),
             len(self.file_set2)
         ))
+
         common_count = len(self._get_common_files())
         Logger.debug("{} files in common".format(
             common_count,
@@ -129,8 +130,7 @@ class FilesetComparator(object):
         """
         Logger.progress("Finding files in common...")
         # Order is important: this will return objects from file_set1
-        return set.intersection(
-            self.file_set2,
+        return self.file_set2.intersection(
             self.file_set1
         )
 
