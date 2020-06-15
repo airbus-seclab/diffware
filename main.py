@@ -90,7 +90,7 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
         return
 
     if config.max_depth >= 0 and depth > config.max_depth:
-        Logger.warn("Not unpacking {} because max recursion depth has been reached".format(file_path))
+        Logger.warn("Max recursion depth reached, skipping {}".format(file_path))
         return
     else:
         Logger.progress("Unpacking {}".format(file_path))
@@ -135,7 +135,7 @@ def _walk(file_path, config, exclude, blacklist):
         for name in files:
             file = pathlib.Path(root, name)
 
-            if not is_excluded(file_path, exclude, config.exclude_mime):
+            if not is_excluded(file, exclude, config.exclude_mime):
                 Logger.progress("Walking {}".format(file))
                 yield file
 
