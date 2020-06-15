@@ -106,7 +106,7 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
     # messy and breaking the original hierachy
     try:
         relative_path = file_path.relative_to(config.data_folder)
-        extract_folder = pathlib.Path(config.data_folder, relative_path.parent)
+        extract_folder = pathlib.Path(config.data_folder, str(relative_path) + "_extracted")
     except ValueError:
         # This file is still in the source_folder, so no need to bother
         extract_folder = config.data_folder
