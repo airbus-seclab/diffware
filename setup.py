@@ -159,11 +159,3 @@ def setup_argparser(name, description, command_line_options):
 
     argcomplete.autocomplete(parser)
     return parser.parse_args(command_line_options[1:])
-
-
-def get_config(arguments, data_folder_key, data_folder_fallback):
-    config = ConfigParser()
-    config.read(arguments.config_file)
-    arguments.data_folder = config.get("unpack", data_folder_key, fallback=data_folder_fallback)
-    config = merge_options(arguments, config)
-    return config

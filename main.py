@@ -22,7 +22,7 @@ from fileset_comparator import FilesetComparator
 from file_comparator import FileComparator
 from logger import Logger
 from utils import get_file_type
-from setup import setup, get_config
+from setup import setup
 
 
 def is_excluded(file, exclude, exclude_mime):
