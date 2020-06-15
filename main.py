@@ -89,13 +89,17 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
     if is_excluded(file_path, exclude, config.exclude_mime):
         return
 
+    # Make sure recursion max depth isn't exceeded
+    should_skip = False
     if config.max_depth >= 0 and depth > config.max_depth:
         Logger.warn("Max recursion depth reached, skipping {}".format(file_path))
-        return
+        should_skip = True
     else:
         Logger.progress("Unpacking {}".format(file_path))
 
-    extracted_count = 0
+    # Symlinks shouln't be followed
+    if file_path.is_symlink():
+        should_skip = True
 
     # Update the "_file_folder" value from the unpacker so fact_extractor
     # doesn't extract in the root output folder, making everything
@@ -109,8 +113,9 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
 
     unpacker._file_folder = extract_folder
 
-    # Symlinks should be copied as text files containing their target
-    if not file_path.is_symlink():
+    # Attempt to extract file, if necessary
+    extracted_count = 0
+    if not should_skip:
         for path in unpacker.unpack(file_path, exclude):
             # unpack already does the walk for us, so we can just call _extract
             # again
@@ -146,6 +151,7 @@ def extract(file_path, unpacker, config):
     """
     data_folder = config.get("unpack", "data_folder")
     exclude = read_list_from_config(config, "unpack", "exclude") or []
+    blacklist = read_list_from_config(config, "unpack", "blacklist") or []
     exclude_mime = config.exclude_mime
     max_depth = config.max_depth
 
