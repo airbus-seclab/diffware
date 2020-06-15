@@ -69,7 +69,7 @@ Here's a list of options that can be set in the config file:
 | jobs             | <cpu_count>   | Number of job to run in parallel                             |
 | exclude_mime     | []            | Exclude files with mime types that match the given glob pattern |
 | fuzzy_threshold  | 80            | Threshold for fuzzy-matching to detect moved files (<= 0 to disable) |
-| max_depth        | 5             | Maximum depth for recursive unpacking (< 0 for no limit)     |
+| max_depth        | 8             | Maximum depth for recursive unpacking (< 0 for no limit)     |
 | extract          | True          | Whether to try to unpack files                               |
 | specialize       | True          | Whether to use file-specific comparison (if False, always compare file binary data) |
 | compute_distance | True          | Whether to compute the distance between two modified files using TLSH |

@@ -30,7 +30,7 @@ class Config(ConfigParser):
             "jobs": multiprocessing.cpu_count(),
             "exclude_mime": [],
             "fuzzy_threshold": 80,
-            "max_depth": 5,
+            "max_depth": 8,
             "extract": True,
             "specialize": True,
             "compute_distance": True,
@@ -142,12 +142,12 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("-L", "--log_level", help="Define the log level", choices=["DEBUG", "INFO", "WARNING", "ERROR"], default=None)
     parser.add_argument("-d", "--debug", action="store_true", help="Print debug messages", default=False)
     parser.add_argument("-C", "--config_file", help="Path to config File", default=default_config_path())
-    parser.add_argument("-j", "--jobs", help="Number of job to run in parallel (default to number of cpus)", type=int, default=None)
+    parser.add_argument("-j", "--jobs", help="Number of job to run in parallel (default is number of cpus)", type=int, default=None)
     parser.add_argument("--exclude", metavar="GLOB_PATTERN", action="append", help="Exclude files paths that match %(metavar)s.", default=["error/*", "inode/chardevice"])
     parser.add_argument("--exclude-mime", dest="exclude_mime", metavar="GLOB_PATTERN", action="append", help="Exclude files with mime types that match %(metavar)s.", default=[])
     parser.add_argument("--blacklist", metavar="MIME_TYPE", action="append", help="Exclude files with %(metavar)s.", default=[])
     parser.add_argument("--fuzzy-threshold", dest="fuzzy_threshold", help="Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)", type=int, default=None)
-    parser.add_argument("--max_depth", help="Maximum depth for recursive unpacking (< 0 for no limit)", type=int, default=None)
+    parser.add_argument("--max_depth", help="Maximum depth for recursive unpacking (< 0 for no limit, default is 8)", type=int, default=None)
     parser.add_argument("--no-extract", action="store_false", dest="extract", help="Consider all files are already extracted, and only compare them", default=None)
     parser.add_argument("--no-specialize", action="store_false", dest="specialize", help="Do not use specific content comparison for known file types, but use simple binary data comparison", default=None)
     parser.add_argument("--no-distance", action="store_false", dest="compute_distance", help="Disable computing the distance between two modified files using TLSH", default=None)
