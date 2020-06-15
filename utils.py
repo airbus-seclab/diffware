@@ -27,7 +27,7 @@ def compute_distance(file1, file2):
     """
     try:
         return tlsh.diff(file1.fuzzy_hash(), file2.fuzzy_hash())
-    except TypeError:
+    except (TypeError, ValueError):
         # File is too small or doesn't have enough randomness
         pass
 
