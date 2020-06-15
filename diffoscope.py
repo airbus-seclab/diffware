@@ -105,7 +105,9 @@ def copy_files(pairs, tmp1, tmp2):
 
 
 def call_diffoscope(dir1, dir2, args):
-    cmd = ["python3", DIFFOSCOPE_PATH, dir1.name, dir2.name, *args]
+    # Set max-container-depth to 0 so diffoscope doesn't try to extract files
+    # which we know have already been extracted
+    cmd = ["python3", DIFFOSCOPE_PATH, dir1.name, dir2.name, "--max-container-depth", "0", *args]
     subprocess.run(cmd)
 
 
