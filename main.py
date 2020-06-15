@@ -90,7 +90,7 @@ def _extract(file_path, unpacker, config, depth=0):
         return
 
     if config.max_depth >= 0 and depth > config.max_depth:
-        Logger.info("Not unpacking {} because max recursion depth has been reached".format(file_path))
+        Logger.warn("Not unpacking {} because max recursion depth has been reached".format(file_path))
         return
     else:
         Logger.progress("Unpacking {}".format(file_path))
