@@ -14,10 +14,22 @@ import subprocess
 DIFFOSCOPE_PATH = "../diffoscope/bin/diffoscope"
 
 
-def _copy_file(file, dir, prefix=""):
+def _get_file_output_path(file, dir, prefix=""):
     # Remove the prefix from the path to build the target output
     file_path = file.relative_to(prefix)
-    dst = pathlib.Path(dir.name, file_path)
+    return pathlib.Path(dir.name, file_path)
+
+
+def _hardlink_file(file, dir, prefix=""):
+    dst = _get_file_output_path(file, dir, prefix)
+
+    # Copy the file to the matching place in the tmp dir so hierachy is kept
+    os.makedirs(dst.parent, exist_ok=True)
+    os.link(file, dst)
+
+
+def _copy_file(file, dir, prefix=""):
+    dst = _get_file_output_path(file, dir, prefix)
 
     # Copy the file to the matching place in the tmp dir so hierachy is kept
     os.makedirs(dst.parent, exist_ok=True)
@@ -95,11 +107,18 @@ def copy_files(pairs, tmp1, tmp2):
     for file1, file2 in pairs:
         if file1 is not None:
             file_count += 1
-            _copy_file(file1, tmp1, prefix=dir1)
+            try:
+                _hardlink_file(file1, tmp1, prefix=dir1)
+            except:
+                # Links may not be available depending on filesystem
+                _copy_file(file1, tmp1, prefix=dir1)
 
         if file2 is not None:
             file_count += 1
-            _copy_file(file2, tmp2, prefix=dir2)
+            try:
+                _hardlink_file(file2, tmp2, prefix=dir2)
+            except:
+                _copy_file(file2, tmp2, prefix=dir2)
 
     print("Copied", file_count, "files")
 
