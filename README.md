@@ -65,3 +65,5 @@ You should also try to exclude as many files as possible, either based on their 
 ```
 --exclude */build/* --exclude *.txt --exclude *.json
 ```
+
+If folders have been renamed (apart from the root file), try to rename them so they match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
