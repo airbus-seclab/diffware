@@ -28,7 +28,6 @@ class Config(ConfigParser):
             "config_file": default_config_path(),
             "log_level": "INFO",
             "jobs": multiprocessing.cpu_count(),
-            "exclude": [],
             "exclude_mime": [],
             "fuzzy_threshold": 80,
             "max_depth": 5,
@@ -44,6 +43,7 @@ class Config(ConfigParser):
         },
         "unpack": {
             "blacklist": [],
+            "exclude": [],
             "data_folder_1": "/tmp/extractor1",
             "data_folder_2": "/tmp/extractor2",
             "data_folder": "/tmp/extractor"
