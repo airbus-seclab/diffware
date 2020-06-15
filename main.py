@@ -10,6 +10,7 @@ import pathlib
 import fnmatch
 import operator
 import itertools
+from copy import deepcopy
 
 sys.path.append("../fact_extractor/fact_extractor")
 from unpacker.unpack import Unpacker
@@ -113,14 +114,14 @@ def _walk(file_path, exclude, exclude_mime):
                 yield file
 
 
-def extract(file_path, unpacker, config, args):
+def extract(file_path, unpacker, config):
     """
     Recursively extract the content of a file or folder
     """
     data_folder = config.get("unpack", "data_folder")
     exclude = read_list_from_config(config, "unpack", "exclude") or []
-    exclude_mime = args.exclude_mime
-    max_depth = args.max_depth
+    exclude_mime = config.exclude_mime
+    max_depth = config.max_depth
 
     # Resolve symlinks and get absolute paths once so we don't run into
     # issues later on by attempting to resolve broken symlinks that were
@@ -138,13 +139,13 @@ def extract(file_path, unpacker, config, args):
         yield from _extract(file_path, unpacker, source_folder, data_folder, exclude, exclude_mime, max_depth)
 
 
-def list_files(file_path, unpacker, config, args):
+def list_files(file_path, unpacker, config):
     """
     List all the files at the given path
     """
     exclude = read_list_from_config(config, "unpack", "exclude") or []
     blacklist = read_list_from_config(config, "unpack", "blacklist") or []
-    exclude_mime = args.exclude_mime
+    exclude_mime = config.exclude_mime
 
     if is_excluded(file_path, exclude, exclude_mime):
         return
@@ -158,25 +159,27 @@ def list_files(file_path, unpacker, config, args):
         yield files.generic.UnpackedFile(file_path, unpacker, data_folder)
 
 
-def get_extracted_files(file_path1, file_path2, arguments):
+def get_extracted_files(file_path1, file_path2, config):
     file_path1 = pathlib.Path(file_path1).resolve()
     file_path2 = pathlib.Path(file_path2).resolve()
 
-    config1 = get_config(arguments, "data_folder_1", "/tmp/extractor1")
-    unpacker1 = Unpacker(config=config1, exclude=arguments.exclude)
+    config1 = deepcopy(config)
+    config1.update("data_folder", config.get("unpack", "data_folder_1"))
+    unpacker1 = Unpacker(config=config1, exclude=config1.exclude)
 
-    config2 = get_config(arguments, "data_folder_2", "/tmp/extractor2")
-    unpacker2 = Unpacker(config=config2, exclude=arguments.exclude)
+    config2 = deepcopy(config)
+    config2.update("data_folder", config.get("unpack", "data_folder_2"))
+    unpacker2 = Unpacker(config=config2, exclude=config2.exclude)
 
-    if arguments.extract:
-        files1 = extract(file_path1, unpacker1, config1, arguments)
-        files2 = extract(file_path2, unpacker2, config2, arguments)
+    if config.extract:
+        files1 = extract(file_path1, unpacker1, config1)
+        files2 = extract(file_path2, unpacker2, config2)
 
         data_folder_1 = "/tmp/extractor1"
         data_folder_2 = "/tmp/extractor2"
     else:
-        files1 = list_files(file_path1, unpacker1, config1, arguments)
-        files2 = list_files(file_path2, unpacker2, config2, arguments)
+        files1 = list_files(file_path1, unpacker1, config1)
+        files2 = list_files(file_path2, unpacker2, config2)
 
         data_folder_1 = file_path1 if file_path1.is_dir() else file_path1.parent
         data_folder_2 = file_path2 if file_path2.is_dir() else file_path2.parent
@@ -190,10 +193,10 @@ def get_extracted_files(file_path1, file_path2, arguments):
     return files1, files2
 
 
-def output_change(edit, arguments):
+def output_change(edit, config):
     path1, path2, distance = edit
 
-    if arguments.compute_distance:
+    if config.compute_distance:
         Logger.output("\nFile1: {}\nFile2: {}\nDistance: {}".format(
             path1,
             path2,
@@ -206,15 +209,15 @@ def output_change(edit, arguments):
         ))
 
 
-def compare_files(file_set1, file_set2, arguments):
-    comparator = FilesetComparator(files1, files2, arguments.specialize, arguments.jobs)
+def compare_files(file_set1, file_set2, config):
+    comparator = FilesetComparator(files1, files2, config.specialize, config.jobs)
     pairs = comparator.get_files_to_compare()
 
     # When sorting , every value has to be computed before starting printing
     delay_output = False
-    if arguments.sort_order.lower() == "distance":
+    if config.sort_order.lower() == "distance":
         delay_output = True
-    elif arguments.sort_order.lower() == "path":
+    elif config.sort_order.lower() == "path":
         delay_output = True
 
     # Print info about the files that were modified
@@ -225,12 +228,12 @@ def compare_files(file_set1, file_set2, arguments):
         if FileComparator.are_equal(file1, file2):
             continue
 
-        if arguments.compute_distance:
+        if config.compute_distance:
             distance = FilesetComparator.compute_distance(file1, file2)
         else:
             distance = None
 
-        if distance is not None and distance < arguments.min_dist:
+        if distance is not None and distance < config.min_dist:
             # Ignore files that are too similar
             continue
 
@@ -238,17 +241,17 @@ def compare_files(file_set1, file_set2, arguments):
 
         # Start printing files if we can, so user doesn't have to wait too long
         if not delay_output:
-            output_change(edits[-1], arguments)
+            output_change(edits[-1], config)
 
     # If necessary, sort and then output the result
-    if arguments.sort_order.lower() == "distance":
+    if config.sort_order.lower() == "distance":
         edits.sort(key=operator.itemgetter(2), reverse=True)
-    elif arguments.sort_order.lower() == "path":
+    elif config.sort_order.lower() == "path":
         edits.sort(key=operator.itemgetter(0), reverse=True)
 
     if delay_output:
         for edit in edits:
-            output_change(edit, arguments)
+            output_change(edit, config)
 
     # Print info about the added and removed files
     added_count = 0
@@ -270,13 +273,13 @@ def compare_files(file_set1, file_set2, arguments):
 
 
 if __name__ == "__main__":
-    arguments = setup()
-    Profiler.PROFILING_ENABLED = arguments.profile
+    config = setup()
+    Profiler.PROFILING_ENABLED = config.profile
 
-    file1 = arguments.FILE_PATH_1
-    file2 = arguments.FILE_PATH_2
-    files1, files2 = get_extracted_files(file1, file2, arguments)
-    compare_files(files1, files2, arguments)
+    file1 = config.FILE_PATH_1
+    file2 = config.FILE_PATH_2
+    files1, files2 = get_extracted_files(file1, file2, config)
+    compare_files(files1, files2, config)
 
     FileComparator.cleanup()
     Profiler.print()
