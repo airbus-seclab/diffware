@@ -74,7 +74,7 @@ def _delete_if_necessary(file_path, source_folder):
     """
     Delete the given file, if it's not in the source_folder
     """
-    if str(source_folder) in file_path.parents:
+    if pathlib.Path(source_folder) in file_path.parents:
         return
 
     os.remove(file_path)
