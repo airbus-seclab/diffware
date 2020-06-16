@@ -31,11 +31,14 @@ def is_excluded(file, exclude, exclude_mime):
             Logger.debug("Ignoring file {}".format(file))
             return True
 
-    mime_type = get_file_type(file)["mime"]
-    for pattern in exclude_mime:
-        if fnmatch.fnmatchcase(mime_type, pattern):
-            Logger.debug("Ignoring file {} with mime-type {}".format(file, mime_type))
-            return True
+    # Don't find mime type if there is no rule to exclude it
+    if exclude_mime:
+        mime_type = get_file_type(file)["mime"]
+
+        for pattern in exclude_mime:
+            if fnmatch.fnmatchcase(mime_type, pattern):
+                Logger.debug("Ignoring file {} with mime-type {}".format(file, mime_type))
+                return True
 
     return False
 
