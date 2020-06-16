@@ -129,10 +129,10 @@ class FilesetComparator(object):
         Return files with the same paths in both sets
         """
         Logger.progress("Finding files in common...")
-        # Order is important: this will return objects from file_set1
-        return self.file_set2.intersection(
-            self.file_set1
-        )
+        # Do this in 2 steps (rather than using .intersection) to make
+        # sure the elements we get are from file_set1
+        diff = self.file_set1 - self.file_set2
+        return self.file_set1 - diff
 
     @cached_property
     @Profiler.profilable
