@@ -89,7 +89,7 @@ optional arguments:
 
 ## Configuration
 
-Most parameters can be set from the CLI and using the config file (see `fact.cfg` for an example).
+Most parameters can be set from the CLI and using the config file (see `config.cfg` for an example).
 
 While settings in the `diff` section are specific to this tool, the ones in the `unpack` and `ExpertSettings` are shared with [fact_extractor](https://github.com/fkie-cad/fact_extractor), so you should check out their documentation.
 

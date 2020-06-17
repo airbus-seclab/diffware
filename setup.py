@@ -11,7 +11,7 @@ from utils import read_list_from_config
 
 def default_config_path():
     current_dir = pathlib.Path(__file__).parent.absolute()
-    return current_dir / "fact.cfg"
+    return current_dir / "config.cfg"
 
 
 class Config(ConfigParser):
