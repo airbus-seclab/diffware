@@ -11,6 +11,7 @@ import fnmatch
 import operator
 import itertools
 from copy import deepcopy
+from functools import lru_cache
 
 try:
     # Try to import fact_extractor if possible, otherwise
@@ -30,20 +31,25 @@ from fileset_comparator import FilesetComparator
 from utils import get_file_type, read_list_from_config
 
 
-def is_excluded(path, exclude, exclude_mime):
-    for pattern in exclude:
+@lru_cache(maxsize=128, typed=False)
+def _is_mime_excluded(mime_type):
+    for pattern in EXCLUDED_MIMES:
+        if fnmatch.fnmatchcase(mime_type, pattern):
+            return True
+
+
+def is_excluded(path):
+    for pattern in EXCLUDED:
         if fnmatch.fnmatchcase(str(path), pattern):
             Logger.debug("Ignoring file {}".format(path))
             return True
 
     # Don't find mime type if there is no rule to exclude it
-    if exclude_mime:
+    if EXCLUDED_MIMES:
         mime_type = get_file_type(path)["mime"]
-
-        for pattern in exclude_mime:
-            if fnmatch.fnmatchcase(mime_type, pattern):
-                Logger.debug("Ignoring file {} with mime-type {}".format(path, mime_type))
-                return True
+        if _is_mime_excluded(mime_type):
+            Logger.debug("Ignoring file {} with mime-type {}".format(path, mime_type))
+            return True
 
     return False
 
@@ -88,13 +94,13 @@ def _delete_if_necessary(file_path, source_folder):
     os.remove(file_path)
 
 
-def _extract(file_path, unpacker, config, exclude, depth=0):
+def _extract(file_path, unpacker, config, depth=0):
     """
     Assume file_path is not a directory, and either recursively extract its
     content, or return the plain file if there is nothing to extract
     """
     # Ignore unwanted files
-    if is_excluded(file_path, exclude, config.exclude_mime):
+    if is_excluded(file_path):
         return
 
     # Make sure recursion max depth isn't exceeded
@@ -124,11 +130,11 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
     # Attempt to extract file, if necessary
     extracted_count = 0
     if not should_skip:
-        for path in unpacker.unpack(file_path, exclude):
+        for path in unpacker.unpack(file_path, EXCLUDED):
             # unpack already does the walk for us, so we can just call _extract
             # again
             extracted_count += 1
-            yield from _extract(path, unpacker, config, exclude, depth=depth + 1)
+            yield from _extract(path, unpacker, config, depth=depth + 1)
 
     if extracted_count == 0:
         # If no files were extracted, at least return this file
@@ -140,7 +146,7 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
         _delete_if_necessary(file_path, config.source_folder)
 
 
-def _walk(file_path, config, exclude, blacklist):
+def _walk(file_path, config):
     """
     Generator to walk the files included in a directory
     """
@@ -148,7 +154,7 @@ def _walk(file_path, config, exclude, blacklist):
         for name in files:
             file = pathlib.Path(root, name)
 
-            if not is_excluded(file, exclude, config.exclude_mime):
+            if not is_excluded(file):
                 Logger.progress("Walking {}".format(file))
                 yield file
 
@@ -158,9 +164,6 @@ def extract(file_path, unpacker, config):
     Recursively extract the content of a file or folder
     """
     data_folder = config.get("unpack", "data_folder")
-    exclude = read_list_from_config(config, "unpack", "exclude") or []
-    blacklist = read_list_from_config(config, "unpack", "blacklist") or []
-    exclude_mime = config.exclude_mime
     max_depth = config.max_depth
 
     # Resolve symlinks and get absolute paths once so we don't run into
@@ -172,29 +175,26 @@ def extract(file_path, unpacker, config):
         # Walk through folders and extract only the files they contain
         config.source_folder = file_path
         config.data_folder = data_folder
-        for path in _walk(file_path, config, exclude, blacklist):
-            yield from _extract(path, unpacker, config, exclude)
+        for path in _walk(file_path, config):
+            yield from _extract(path, unpacker, config)
     else:
         # Regular files can just be extracted
         config.source_folder = file_path.parent
         config.data_folder = data_folder
-        yield from _extract(file_path, unpacker, config, exclude)
+        yield from _extract(file_path, unpacker, config)
 
 
-def list_files(file_path, config, exclude):
+def list_files(file_path, config):
     """
     List all the files at the given path
     """
-    exclude = read_list_from_config(config, "unpack", "exclude") or []
-    blacklist = read_list_from_config(config, "unpack", "blacklist") or []
-    exclude_mime = config.exclude_mime
 
-    if is_excluded(file_path, exclude, config.exclude_mime):
+    if is_excluded(file_path):
         return
 
     if file_path.is_dir():
         data_folder = file_path
-        for path in _walk(file_path, config, exclude, blacklist):
+        for path in _walk(file_path, config):
             yield files.generic.UnpackedFile(path, data_folder)
     else:
         data_folder = file_path.parent
@@ -204,7 +204,6 @@ def list_files(file_path, config, exclude):
 def get_extracted_files(file_path1, file_path2, config):
     file_path1 = pathlib.Path(file_path1).resolve()
     file_path2 = pathlib.Path(file_path2).resolve()
-    exclude = read_list_from_config(config, "unpack", "exclude") or []
 
     config1 = deepcopy(config)
     config1.update("data_folder", config.get("unpack", "data_folder_1"))
@@ -213,8 +212,8 @@ def get_extracted_files(file_path1, file_path2, config):
     config2.update("data_folder", config.get("unpack", "data_folder_2"))
 
     if config.extract:
-        unpacker1 = Unpacker(config=config1, exclude=exclude)
-        unpacker2 = Unpacker(config=config2, exclude=exclude)
+        unpacker1 = Unpacker(config=config1, exclude=EXCLUDED)
+        unpacker2 = Unpacker(config=config2, exclude=EXCLUDED)
 
         files1 = extract(file_path1, unpacker1, config1)
         files2 = extract(file_path2, unpacker2, config2)
@@ -222,8 +221,8 @@ def get_extracted_files(file_path1, file_path2, config):
         data_folder_1 = "/tmp/extractor1"
         data_folder_2 = "/tmp/extractor2"
     else:
-        files1 = list_files(file_path1, config1, exclude)
-        files2 = list_files(file_path2, config2, exclude)
+        files1 = list_files(file_path1, config1)
+        files2 = list_files(file_path2, config2)
 
         data_folder_1 = file_path1 if file_path1.is_dir() else file_path1.parent
         data_folder_2 = file_path2 if file_path2.is_dir() else file_path2.parent
@@ -322,6 +321,11 @@ if __name__ == "__main__":
 
     if config.extract and not FACT_FOUND:
         raise ModuleNotFoundError("fact_extractor not found on your system, please use the --no-extract option or see the install instructions")
+
+    # Use global variables so it doesn't break lru_cache
+    global EXCLUDED, EXCLUDED_MIMES
+    EXCLUDED = read_list_from_config(config, "unpack", "exclude") or []
+    EXCLUDED_MIMES = config.exclude_mime
 
     file1 = config.FILE_PATH_1
     file2 = config.FILE_PATH_2
