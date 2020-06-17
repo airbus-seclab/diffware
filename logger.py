@@ -41,11 +41,8 @@ class Logger():
         Logger.DEBUG = debug
         Logger.SHOW_PROGRESS = progress
         Logger.LOGGING_LEVEL = logging.DEBUG if debug else log_level
-        Logger.OUTPUT_FILE = None if output_file == "-" else output_file
-
-        if Logger.OUTPUT_FILE:
-            with open(Logger.OUTPUT_FILE, "w") as f:
-                pass
+        if output_file != "-":
+            Logger.OUTPUT_FILE = open(output_file, "w")
 
         if debug and FACT_FOUND:
             fact_setup_logging(debug, log_level=logging.DEBUG)
@@ -58,6 +55,11 @@ class Logger():
             console_log = logging.StreamHandler()
             console_log.setFormatter(CustomFormatter())
             logger.addHandler(console_log)
+
+    @staticmethod
+    def cleanup():
+        if Logger.OUTPUT_FILE:
+            Logger.OUTPUT_FILE.close()
 
     # Define custom logging methods so as not to conflict with FACT's logging
 
@@ -96,8 +98,7 @@ class Logger():
         if Logger.OUTPUT_FILE is None:
             print(*args, **kwargs)
         else:
-            with open(Logger.OUTPUT_FILE, "a+") as f:
-                print(*args, **kwargs, file=f)
+            print(*args, **kwargs, file=Logger.OUTPUT_FILE)
 
     @staticmethod
     def progress(string):

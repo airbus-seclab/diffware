@@ -328,10 +328,12 @@ if __name__ == "__main__":
     EXCLUDED = read_list_from_config(config, "unpack", "exclude") or []
     EXCLUDED_MIMES = config.exclude_mime
 
-    file1 = config.FILE_PATH_1
-    file2 = config.FILE_PATH_2
-    files1, files2 = get_extracted_files(file1, file2, config)
-    compare_files(files1, files2, config)
-
-    FileComparator.cleanup()
-    Profiler.print()
+    try:
+        file1 = config.FILE_PATH_1
+        file2 = config.FILE_PATH_2
+        files1, files2 = get_extracted_files(file1, file2, config)
+        compare_files(files1, files2, config)
+        Profiler.print()
+    finally:
+        FileComparator.cleanup()
+        Logger.cleanup()
