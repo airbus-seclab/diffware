@@ -10,12 +10,14 @@ class UnpackedFile(object):
     # Regex describing the filemagic to match for this class
     recognize_regex = re.compile(r".*")
 
-    def __init__(self, path, unpacker, data_folder="/"):
+    def __init__(self, path, data_folder="/"):
         self.path = path
         self._data_folder = data_folder
-        self.type = get_file_type(path)
-        _, self.plugin, self.plugin_version = unpacker.get_unpacker(self.type["mime"])
         self._match = None
+
+    @cached_property
+    def type(self):
+        return get_file_type(self.path)
 
     @cached_property
     def relative_path(self):

@@ -190,10 +190,8 @@ class FilesetComparator(object):
         if not self.config.specialize:
             return file
 
-        file_type = get_file_type(file.path)
-
         for file_class in files.FILE_TYPES:
-            if file_class.recognizes(file_type):
+            if file_class.recognizes(file.type()):
                 file.__class__ = file_class
                 break
 

@@ -12,9 +12,16 @@ import operator
 import itertools
 from copy import deepcopy
 
-sys.path.append("../fact_extractor/fact_extractor")
-from unpacker.unpack import Unpacker
-from helperFunctions.config import read_list_from_config
+try:
+    # Try to import fact_extractor if possible, otherwise
+    # disable unpacking
+    sys.path.append("../fact_extractor/fact_extractor")
+    from unpacker.unpack import Unpacker
+    FACT_FOUND = True
+except ModuleNotFoundError:
+    FACT_FOUND = False
+
+from utils import read_list_from_config
 
 import files
 from profiler import Profiler
@@ -25,19 +32,19 @@ from utils import get_file_type
 from setup import setup
 
 
-def is_excluded(file, exclude, exclude_mime):
+def is_excluded(path, exclude, exclude_mime):
     for pattern in exclude:
-        if fnmatch.fnmatchcase(str(file), pattern):
-            Logger.debug("Ignoring file {}".format(file))
+        if fnmatch.fnmatchcase(str(path), pattern):
+            Logger.debug("Ignoring file {}".format(path))
             return True
 
     # Don't find mime type if there is no rule to exclude it
     if exclude_mime:
-        mime_type = get_file_type(file)["mime"]
+        mime_type = get_file_type(path)["mime"]
 
         for pattern in exclude_mime:
             if fnmatch.fnmatchcase(mime_type, pattern):
-                Logger.debug("Ignoring file {} with mime-type {}".format(file, mime_type))
+                Logger.debug("Ignoring file {} with mime-type {}".format(path, mime_type))
                 return True
 
     return False
@@ -129,7 +136,7 @@ def _extract(file_path, unpacker, config, exclude, depth=0):
         # If no files were extracted, at least return this file
         # _copy_if_necessary takes care of handling symlinks
         path = _copy_if_necessary(file_path, config.source_folder, config.data_folder)
-        yield files.generic.UnpackedFile(path, unpacker, config.data_folder)
+        yield files.generic.UnpackedFile(path, config.data_folder)
     else:
         # Since the content was extracted, we can delete this file
         _delete_if_necessary(file_path, config.source_folder)
@@ -176,7 +183,7 @@ def extract(file_path, unpacker, config):
         yield from _extract(file_path, unpacker, config, exclude)
 
 
-def list_files(file_path, unpacker, config, exclude):
+def list_files(file_path, config, exclude):
     """
     List all the files at the given path
     """
@@ -190,10 +197,10 @@ def list_files(file_path, unpacker, config, exclude):
     if file_path.is_dir():
         data_folder = file_path
         for path in _walk(file_path, config, exclude, blacklist):
-            yield files.generic.UnpackedFile(path, unpacker, data_folder)
+            yield files.generic.UnpackedFile(path, data_folder)
     else:
         data_folder = file_path.parent
-        yield files.generic.UnpackedFile(file_path, unpacker, data_folder)
+        yield files.generic.UnpackedFile(file_path, data_folder)
 
 
 def get_extracted_files(file_path1, file_path2, config):
@@ -203,21 +210,22 @@ def get_extracted_files(file_path1, file_path2, config):
 
     config1 = deepcopy(config)
     config1.update("data_folder", config.get("unpack", "data_folder_1"))
-    unpacker1 = Unpacker(config=config1, exclude=exclude)
 
     config2 = deepcopy(config)
     config2.update("data_folder", config.get("unpack", "data_folder_2"))
-    unpacker2 = Unpacker(config=config2, exclude=exclude)
 
     if config.extract:
+        unpacker1 = Unpacker(config=config1, exclude=exclude)
+        unpacker2 = Unpacker(config=config2, exclude=exclude)
+
         files1 = extract(file_path1, unpacker1, config1)
         files2 = extract(file_path2, unpacker2, config2)
 
         data_folder_1 = "/tmp/extractor1"
         data_folder_2 = "/tmp/extractor2"
     else:
-        files1 = list_files(file_path1, unpacker1, config1, exclude)
-        files2 = list_files(file_path2, unpacker2, config2, exclude)
+        files1 = list_files(file_path1, config1, exclude)
+        files2 = list_files(file_path2, config2, exclude)
 
         data_folder_1 = file_path1 if file_path1.is_dir() else file_path1.parent
         data_folder_2 = file_path2 if file_path2.is_dir() else file_path2.parent
@@ -313,6 +321,9 @@ def compare_files(file_set1, file_set2, config):
 if __name__ == "__main__":
     config = setup()
     Profiler.PROFILING_ENABLED = config.profile
+
+    if config.extract and not FACT_FOUND:
+        raise ModuleNotFoundError("fact_extractor not found on your system, please use the --no-extract option or see the install instructions")
 
     file1 = config.FILE_PATH_1
     file2 = config.FILE_PATH_2

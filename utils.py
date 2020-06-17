@@ -3,6 +3,8 @@ import tlsh
 import pathlib
 import subprocess
 from functools import wraps
+from configparser import NoOptionError, NoSectionError
+
 from fact_helper_file import get_file_type_from_path
 
 
@@ -64,3 +66,20 @@ def cached_property(func):
         return getattr(instance, property_name)
 
     return wrapper
+
+
+def read_list_from_config(config_file, section, key, fallback=None):
+    """
+    Inspired by https://github.com/fkie-cad/fact_extractor/blob/master/fact_extractor/helperFunctions/config.py
+    """
+    fallback = fallback or []
+
+    try:
+        value = config_file.get(section, key)
+    except (NoOptionError, NoSectionError):
+        value = None
+
+    if not value:
+        return fallback
+
+    return [item.strip() for item in value.split(",") if item]

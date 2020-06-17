@@ -1,6 +1,11 @@
 import os
 import logging
-from helperFunctions.program_setup import setup_logging as fact_setup_logging
+
+try:
+    from helperFunctions.program_setup import setup_logging as fact_setup_logging
+    FACT_FOUND = True
+except ModuleNotFoundError:
+    FACT_FOUND = False
 
 
 class CustomFormatter(logging.Formatter):
@@ -40,7 +45,7 @@ class Logger():
             with open(Logger.OUTPUT_FILE, "w") as f:
                 pass
 
-        if debug:
+        if debug and FACT_FOUND:
             fact_setup_logging(debug, log_level=logging.DEBUG)
         else:
             # Hide info from FACT

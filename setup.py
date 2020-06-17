@@ -6,8 +6,7 @@ import multiprocessing
 from configparser import ConfigParser
 
 from logger import Logger
-
-from helperFunctions.config import read_list_from_config
+from utils import read_list_from_config
 
 
 def default_config_path():

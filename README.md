@@ -2,6 +2,36 @@
 
 ## Installing
 
+### Minimal
+
+The minimal install doesn't allow for automatic file extraction, but can work on already extracted files and directories.
+
+The `fact_helper_file` provides filemagick and config parsing helpers:
+
+```
+git clone https://github.com/fkie-cad/fact_helper_file.git
+cd fact_helper_file
+pip3 install .
+```
+
+The `tlsh` module enables to compute distances between files and identify moved files:
+
+```
+pip3 install tlsh
+```
+
+All that is left is to clone this repository:
+
+```
+git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
+cd ~/difftool
+```
+
+
+### Full
+
+The full install adds an automatic extraction tool.
+
 Install `fact_extractor` from [this branch](https://github.com/JRomainG/fact_extractor/tree/dev):
 
 ```
@@ -11,7 +41,13 @@ fact_extractor/install/pre_install.sh
 fact_extractor/install.py
 ```
 
-Clone this repository:
+Make sure the `tlsh` is installed:
+
+```
+pip3 install tlsh
+```
+
+Finally, clone this repository:
 
 ```
 git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
@@ -21,7 +57,7 @@ cd ~/difftool
 ## Usage
 
 ```
-python3 main.py -h
+./main.py -h
 
 positional arguments:
   FILE_PATH_1           Path to first file
@@ -55,7 +91,7 @@ optional arguments:
 
 Most parameters can be set from the CLI and using the config file (see `fact.cfg` for an example).
 
-While settings in the `diff` section are specific to this tool, the ones in the `unpack` and `ExpertSettings` are shard with [fact_extractor](https://github.com/fkie-cad/FACT_core), so you should check out their documentation.
+While settings in the `diff` section are specific to this tool, the ones in the `unpack` and `ExpertSettings` are shared with [fact_extractor](https://github.com/fkie-cad/fact_extractor), so you should check out their documentation.
 
 Here's a list of options that can be set in the config file:
 
@@ -113,4 +149,4 @@ You should also try to exclude as many files as possible, either based on their 
 
 If folders have been renamed (apart from the root file), try to rename them so they match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
 
-You can also tweak the `blacklist` option from the config file to prevent unpacking attempt of known mime-types for which it's unnecessary.
+You can also tweak the `blacklist` option from the config file to prevent unpacking attempts of known mime-types for which it's unnecessary.
