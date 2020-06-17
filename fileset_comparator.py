@@ -165,7 +165,12 @@ class FilesetComparator(object):
             return None
 
         if file_set is None:
-            file_set = self._new_files
+            file_set = list(self._new_files)
+
+        # Randomize the order in which the files are iterated so multithreading
+        # doesn't compute the fuzzy_hash of the same file multiple times
+        # in parallel, rendering the cache useless
+        random.shuffle(file_set)
 
         comparisons = []
         for f in file_set:
