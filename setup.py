@@ -7,7 +7,6 @@ from configparser import ConfigParser
 
 from logger import Logger
 
-from helperFunctions.program_setup import merge_options
 from helperFunctions.config import read_list_from_config
 
 

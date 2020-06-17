@@ -12,8 +12,6 @@ from logger import Logger
 from file_comparator import FileComparator
 from files.analyzer import Analyzer, Command, Regex
 
-from fact_helper_file import get_file_type_from_path
-
 
 class ElfAnalyzer(Analyzer):
     def __init__(self, path):
