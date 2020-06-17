@@ -109,7 +109,7 @@ def _extract(file_path, unpacker, config, depth=0):
         Logger.warn("Max recursion depth reached, skipping {}".format(file_path))
         should_skip = True
     else:
-        Logger.progress("Unpacking {}".format(file_path))
+        Logger.progress("Unpacking {}...".format(file_path))
 
     # Symlinks shouln't be followed
     if file_path.is_symlink():
@@ -155,7 +155,7 @@ def _walk(file_path, config):
             file = pathlib.Path(root, name)
 
             if not is_excluded(file):
-                Logger.progress("Walking {}".format(file))
+                Logger.progress("Walking {}...".format(file))
                 yield file
 
 
@@ -264,10 +264,10 @@ def compare_files(file_set1, file_set2, config):
         delay_output = True
 
     # Print info about the files that were modified
-    Logger.progress("Computing distances for modified files...")
-
     edits = []
     for file1, file2 in pairs:
+        Logger.progress("Comparing {} and {}...".format(file1.relative_path, file2.relative_path))
+
         if FileComparator.are_equal(file1, file2):
             continue
 
@@ -287,6 +287,7 @@ def compare_files(file_set1, file_set2, config):
             output_change(edits[-1], config)
 
     # If necessary, sort and then output the result
+    Logger.progress("Generating output...")
     if config.sort_order.lower() == "distance":
         edits.sort(key=operator.itemgetter(2), reverse=True)
     elif config.sort_order.lower() == "path":
