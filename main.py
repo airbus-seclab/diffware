@@ -299,12 +299,12 @@ def compare_files(file_set1, file_set2, config):
 
     # Print info about the added and removed files
     added_count = 0
-    for added in comparator.get_added_files():
+    for added in comparator.added_files:
         added_count += 1
         Logger.output("\nAdded: {}".format(added.path))
 
     removed_count = 0
-    for removed in comparator.get_removed_files():
+    for removed in comparator.removed_files:
         removed_count += 1
         Logger.output("\nRemoved: {}".format(removed.path))
 

@@ -1,9 +1,10 @@
 import os
 import re
 import tlsh
+from functools import cached_property
 
 from profiler import Profiler
-from utils import cached_property, get_file_type
+from utils import get_file_type
 
 
 class UnpackedFile(object):
@@ -29,7 +30,7 @@ class UnpackedFile(object):
     def __eq__(self, other):
         # Consider that extracted files match if they have the same path
         # Their content is checked later using the contents of _comparable_path
-        result = (self.relative_path() == other.relative_path())
+        result = (self.relative_path == other.relative_path)
         if result:
             # Store which other file this one matches so it can be easily
             # accessed later on
@@ -38,7 +39,7 @@ class UnpackedFile(object):
         return result
 
     def __hash__(self):
-        return hash(self.relative_path())
+        return hash(self.relative_path)
 
     @classmethod
     def recognizes(self, file_type: dict):
@@ -61,7 +62,7 @@ class UnpackedFile(object):
     @Profiler.profilable
     def _read(self):
         def generator():
-            with open(self._comparable_path(), "rb") as f:
+            with open(self._comparable_path, "rb") as f:
                 for buf in iter(lambda: f.read(32768), b""):
                     yield buf
         return generator()

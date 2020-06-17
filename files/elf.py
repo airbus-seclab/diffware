@@ -4,11 +4,11 @@ import tlsh
 import itertools
 import subprocess
 import collections
+from functools import cached_property
 
 from logger import Logger
 from profiler import Profiler
 from .generic import UnpackedFile
-from utils import cached_property
 from file_comparator import FileComparator
 from files.analyzer import Analyzer, Command, Regex
 

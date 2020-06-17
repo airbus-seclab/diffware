@@ -28,7 +28,7 @@ def compute_distance(file1, file2):
     If it fails, revert to counting the number of different bytes
     """
     try:
-        return tlsh.diff(file1.fuzzy_hash(), file2.fuzzy_hash())
+        return tlsh.diff(file1.fuzzy_hash, file2.fuzzy_hash)
     except (TypeError, ValueError):
         # File is too small or doesn't have enough randomness
         pass
@@ -48,24 +48,6 @@ def compute_distance(file1, file2):
     # magnitude as TLSH's distance, and set at a min value of 1
     diff = int(10 * len(diff_bytes) / max(1, file_size))
     return max(diff, 1)
-
-
-def cached_property(func):
-    """
-    Decorator for class properties so they are computed once, and then
-    stored as an attribute of the class
-    """
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        instance = args[0]
-        property_name = "_{}_{}".format(instance.__class__, func.__name__)
-
-        if not hasattr(instance, property_name):
-            setattr(instance, property_name, func(*args, **kwargs))
-
-        return getattr(instance, property_name)
-
-    return wrapper
 
 
 def read_list_from_config(config_file, section, key, fallback=None):

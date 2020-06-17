@@ -14,8 +14,8 @@ class FileComparator(object):
         Inspired by has_same_content_as in diffoscope/comparators/utils/file.py
         """
         try:
-            file1_size = os.path.getsize(file1._comparable_path())
-            file2_size = os.path.getsize(file2._comparable_path())
+            file1_size = os.path.getsize(file1._comparable_path)
+            file2_size = os.path.getsize(file2._comparable_path)
         except OSError as e:
             # Files not readable (e.g. broken symlinks) or something else,
             # just assume they are different
@@ -29,7 +29,7 @@ class FileComparator(object):
 
         # Call an external diff otherwise
         return subprocess.call(
-            ("cmp", "-s", file1._comparable_path(), file2._comparable_path()),
+            ("cmp", "-s", file1._comparable_path, file2._comparable_path),
             shell=False,
             close_fds=True,
         ) == 0

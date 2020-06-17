@@ -1,10 +1,12 @@
+import random
 import operator
 import multiprocessing
+from functools import cached_property
 
 import files
 from logger import Logger
 from profiler import Profiler
-from utils import cached_property, get_file_type, compute_distance
+from utils import get_file_type, compute_distance
 
 
 class FilesetComparator(object):
@@ -31,22 +33,22 @@ class FilesetComparator(object):
             len(self.file_set2)
         ))
 
-        common_count = len(self._get_common_files())
+        common_count = len(self._common_files)
         Logger.debug("{} files in common".format(
             common_count,
         ))
 
-        new_count = len(self._get_new_files())
+        new_count = len(self._new_files)
         Logger.debug("{} new files".format(
             new_count,
         ))
 
-        missing_count = len(self._get_missing_files())
+        missing_count = len(self._missing_files)
         Logger.debug("{} missing files".format(
             missing_count,
         ))
 
-        moved_count = len(self.get_moved_file_pairs())
+        moved_count = len(self.moved_file_pairs)
         Logger.debug("Found {} files in common, {} moved files, {} new files and {} missing files\n".format(
             common_count,
             moved_count,
@@ -56,27 +58,27 @@ class FilesetComparator(object):
         return self._get_matching_pairs()
 
     @cached_property
-    def get_removed_files(self):
+    def removed_files(self):
         """
         Returns a list of removed files than were not found to be moved
         """
         # Get only the original files (aka from file1) that were moved
-        moved = map(lambda pair: pair[0], self.get_moved_file_pairs())
-        return self._get_missing_files() - set(moved)
+        moved = map(lambda pair: pair[0], self.moved_file_pairs)
+        return self._missing_files - set(moved)
 
     @cached_property
-    def get_added_files(self):
+    def added_files(self):
         """
         Returns a list of new files than were not found to be similar to an
         older removed files
         """
         # Get only the target files (aka from file2) that were moved
-        moved = map(lambda pair: pair[1], self.get_moved_file_pairs())
-        return self._get_new_files() - set(moved)
+        moved = map(lambda pair: pair[1], self.moved_file_pairs)
+        return self._new_files - set(moved)
 
     @cached_property
     @Profiler.profilable
-    def get_moved_file_pairs(self):
+    def moved_file_pairs(self):
         """
         Use files' fuzzy hash to identify those that were moved
         """
@@ -84,7 +86,7 @@ class FilesetComparator(object):
             return []
 
         moved = []
-        files = list(self._get_missing_files())
+        files = list(self._missing_files)
 
         with multiprocessing.Pool(self.config.jobs) as pool:
              matched = pool.map(self._match_file, files)
@@ -110,12 +112,12 @@ class FilesetComparator(object):
         Returns a list of pair of files to be compared
         """
         def generator():
-            for file in self._get_common_files():
+            for file in self._common_files:
                 file1 = self._specialize_file(file)
                 file2 = self._specialize_file(file._match)
                 yield (file1, file2)
 
-            for pair in self.get_moved_file_pairs():
+            for pair in self.moved_file_pairs:
                 file1 = self._specialize_file(pair[0])
                 file2 = self._specialize_file(pair[1])
                 yield (file1, file2)
@@ -124,7 +126,7 @@ class FilesetComparator(object):
 
     @cached_property
     @Profiler.profilable
-    def _get_common_files(self):
+    def _common_files(self):
         """
         Return files with the same paths in both sets
         """
@@ -136,21 +138,21 @@ class FilesetComparator(object):
 
     @cached_property
     @Profiler.profilable
-    def _get_missing_files(self):
+    def _missing_files(self):
         """
         Return files which exist in the first set but not the second
         """
         Logger.progress("Finding missing files...")
-        return self.file_set1 - self._get_common_files()
+        return self.file_set1 - self._common_files
 
     @cached_property
     @Profiler.profilable
-    def _get_new_files(self):
+    def _new_files(self):
         """
         Return files which exist in the second set but not the first
         """
         Logger.progress("Finding new files...")
-        return self.file_set2 - self._get_common_files()
+        return self.file_set2 - self._common_files
 
     def _match_file(self, file, file_set=None):
         """
@@ -159,15 +161,15 @@ class FilesetComparator(object):
         """
         Logger.progress("Looking for moved {}...".format(file.path))
 
-        if file.fuzzy_hash() is None:
+        if file.fuzzy_hash is None:
             return None
 
         if file_set is None:
-            file_set = self._get_new_files()
+            file_set = self._new_files
 
         comparisons = []
         for f in file_set:
-            if not f.fuzzy_hash():
+            if not f.fuzzy_hash:
                 continue
 
             score = type(self).compute_distance(file, f)
@@ -191,7 +193,7 @@ class FilesetComparator(object):
             return file
 
         for file_class in files.FILE_TYPES:
-            if file_class.recognizes(file.type()):
+            if file_class.recognizes(file.type):
                 file.__class__ = file_class
                 break
 
