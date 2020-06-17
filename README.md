@@ -59,6 +59,11 @@ cd ~/difftool
 ```
 ./main.py -h
 
+usage: main.py [-h] [-o DATA_FILE] [-L {DEBUG,INFO,WARNING,ERROR}] [-d] [-C CONFIG_FILE] [-j JOBS] [--exclude GLOB_PATTERN] [--exclude-mime GLOB_PATTERN] [--blacklist MIME_TYPE]
+               [--fuzzy-threshold FUZZY_THRESHOLD] [--max_depth MAX_DEPTH] [--no-extract] [--no-specialize] [--no-distance] [--order-by {none,path,distance}] [--min_dist MIN_DIST]
+               [--no-progress] [--enable-statistics] [--profile]
+               FILE_PATH_1 FILE_PATH_2
+
 positional arguments:
   FILE_PATH_1           Path to first file
   FILE_PATH_2           Path to second file
@@ -71,18 +76,25 @@ optional arguments:
                         Define the log level
   -d, --debug           Print debug messages
   -C CONFIG_FILE, --config_file CONFIG_FILE
-                        set path to config File
+                        Path to config File
+  -j JOBS, --jobs JOBS  Number of job to run in parallel (default is number of cpus)
   --exclude GLOB_PATTERN
                         Exclude files paths that match GLOB_PATTERN.
+  --exclude-mime GLOB_PATTERN
+                        Exclude files with mime types that match GLOB_PATTERN.
   --blacklist MIME_TYPE
                         Exclude files with MIME_TYPE.
+  --fuzzy-threshold FUZZY_THRESHOLD
+                        Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)
   --max_depth MAX_DEPTH
-                        Maximum depth for recursive unpacking (< 0 for no limit)
+                        Maximum depth for recursive unpacking (< 0 for no limit, default is 8)
   --no-extract          Consider all files are already extracted, and only compare them
   --no-specialize       Do not use specific content comparison for known file types, but use simple binary data comparison
-  --no-distance         Compute the distance between two modified files using TLSH
+  --no-distance         Disable computing the distance between two modified files using TLSH
   --order-by {none,path,distance}
                         Define the sort order for the output. Note: setting this to anything other than "none" will disable progressive output
+  --min_dist MIN_DIST   Ignore files with a difference lower than the one given (< 0 for no limit)
+  --no-progress         Hide progress messages
   --enable-statistics   Compute statistics or check for unpack data loss
   --profile             Measure the number of calls and time spent in different methods
 ```
@@ -111,6 +123,7 @@ Here's a list of options that can be set in the config file:
 | compute_distance | True          | Whether to compute the distance between two modified files using TLSH |
 | sort_order       | "none"        | Define the sort order for the output                         |
 | min_dist         | -1            | Ignore files with a difference lower than the one given (< 0 for no limit) |
+| show_progress    | True          | Whether to output progress messages in the console or not    |
 | profile          | False         | Whether to measure the number of calls and time spent in different methods |
 
 ### `unpack` section

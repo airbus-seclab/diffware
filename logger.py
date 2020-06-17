@@ -34,10 +34,12 @@ class Logger():
     DEBUG = False
     LOGGING_LEVEL = logging.INFO
     OUTPUT_FILE = None
+    SHOW_PROGRESS = True
 
     @staticmethod
-    def setup_logging(debug=False, log_level=logging.WARNING, output_file="-"):
+    def setup_logging(debug=False, progress=True, log_level=logging.WARNING, output_file="-"):
         Logger.DEBUG = debug
+        Logger.SHOW_PROGRESS = progress
         Logger.LOGGING_LEVEL = logging.DEBUG if debug else log_level
         Logger.OUTPUT_FILE = None if output_file == "-" else output_file
 
@@ -99,6 +101,9 @@ class Logger():
 
     @staticmethod
     def progress(string):
+        if not Logger.SHOW_PROGRESS:
+            return
+
         # Make string take up exactly full width
         try:
             max_size = os.get_terminal_size()[0]

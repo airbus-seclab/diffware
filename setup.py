@@ -32,6 +32,7 @@ class Config(ConfigParser):
             "extract": True,
             "specialize": True,
             "compute_distance": True,
+            "show_progress": True,
             "sort_order": "none",
             "min_dist": -1,
             "statistics": False,
@@ -120,7 +121,7 @@ class Config(ConfigParser):
 def setup():
     arguments = setup_argparser("difftool", "Shallow firmware diffing tool", sys.argv)
     config = Config(arguments)
-    Logger.setup_logging(debug=config.debug, log_level=config.log_level, output_file=config.data_file)
+    Logger.setup_logging(debug=config.debug, progress=config.show_progress, log_level=config.log_level, output_file=config.data_file)
 
     if config.sort_order.lower() == "distance" and not config.compute_distance:
         raise ValueError("Order set to distance, but computing distance is disabled")
@@ -151,6 +152,7 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("--no-distance", action="store_false", dest="compute_distance", help="Disable computing the distance between two modified files using TLSH", default=None)
     parser.add_argument("--order-by", dest="sort_order", help="Define the sort order for the output. Note: setting this to anything other than \"none\" will disable progressive output", choices=["none", "path", "distance"], default=None)
     parser.add_argument("--min_dist", help="Ignore files with a difference lower than the one given (< 0 for no limit)", type=int, default=None)
+    parser.add_argument("--no-progress", action="store_false", dest="show_progress", help="Hide progress messages", default=None)
     parser.add_argument("--enable-statistics", action="store_true", dest="statistics", help="Compute statistics or check for unpack data loss", default=None)
     parser.add_argument("--profile", action="store_true", help="Measure the number of calls and time spent in different methods", default=False)
 
