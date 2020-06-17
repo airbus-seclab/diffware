@@ -2,9 +2,9 @@ import operator
 import multiprocessing
 
 import files
-from utils import cached_property, get_file_type, compute_distance
-from profiler import Profiler
 from logger import Logger
+from profiler import Profiler
+from utils import cached_property, get_file_type, compute_distance
 
 
 class FilesetComparator(object):

@@ -21,15 +21,13 @@ try:
 except ModuleNotFoundError:
     FACT_FOUND = False
 
-from utils import read_list_from_config
-
 import files
-from profiler import Profiler
-from fileset_comparator import FilesetComparator
-from file_comparator import FileComparator
-from logger import Logger
-from utils import get_file_type
 from setup import setup
+from logger import Logger
+from profiler import Profiler
+from file_comparator import FileComparator
+from fileset_comparator import FilesetComparator
+from utils import get_file_type, read_list_from_config
 
 
 def is_excluded(path, exclude, exclude_mime):

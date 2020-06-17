@@ -2,8 +2,8 @@ import os
 import re
 import tlsh
 
-from utils import cached_property, get_file_type
 from profiler import Profiler
+from utils import cached_property, get_file_type
 
 
 class UnpackedFile(object):

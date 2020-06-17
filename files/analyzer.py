@@ -1,8 +1,8 @@
 import re
 import subprocess
 
-from profiler import Profiler
 from logger import Logger
+from profiler import Profiler
 
 
 class Analyzer:
