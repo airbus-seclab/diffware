@@ -19,6 +19,10 @@ def get_file_type(path):
     if path.is_dir():
         return {"mime": "directory", "full": ""}
 
+    # Attempting to open this would stay stuck forever
+    if path.is_fifo():
+        return {"mime": "inode/fifo", "full": ""}
+
     return get_file_type_from_path(path)
 
 
