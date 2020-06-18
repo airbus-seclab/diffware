@@ -154,8 +154,8 @@ def _walk(file_path, config):
         for name in files:
             file = pathlib.Path(root, name)
 
+            Logger.progress("Walking {}...".format(file))
             if not is_excluded(file):
-                Logger.progress("Walking {}...".format(file))
                 yield file
 
 
