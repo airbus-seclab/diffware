@@ -23,6 +23,10 @@ def get_file_type(path):
     if path.is_fifo():
         return {"mime": "inode/fifo", "full": ""}
 
+    # Don't attempt to open sockets
+    if path.is_socket():
+        return {"mime": "inode/socket", "full": ""}
+
     return get_file_type_from_path(path)
 
 
