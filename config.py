@@ -118,7 +118,7 @@ class Config(ConfigParser):
         raise ValueError("Unkown key {}".format(key))
 
 
-def setup():
+def make_config():
     arguments = setup_argparser("difftool", "Shallow firmware diffing tool", sys.argv)
     config = Config(arguments)
     Logger.setup_logging(debug=config.debug, progress=config.show_progress, log_level=config.log_level, output_file=config.data_file)

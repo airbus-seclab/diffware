@@ -23,7 +23,7 @@ except ModuleNotFoundError:
     FACT_FOUND = False
 
 import files
-from setup import setup
+from config import make_config
 from logger import Logger
 from profiler import Profiler
 from file_comparator import FileComparator
@@ -317,7 +317,7 @@ def compare_files(file_set1, file_set2, config):
 
 
 if __name__ == "__main__":
-    config = setup()
+    config = make_config()
     Profiler.PROFILING_ENABLED = config.profile
 
     if config.extract and not FACT_FOUND:
