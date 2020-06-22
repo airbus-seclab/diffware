@@ -11,7 +11,7 @@ import tempfile
 import subprocess
 
 
-DIFFOSCOPE_PATH = "../diffoscope/bin/diffoscope"
+DIFFOSCOPE_PATH = "diffoscope"
 
 
 def _get_file_output_path(file, dir, prefix=""):
