@@ -96,6 +96,8 @@ class Logger():
     @staticmethod
     def output(*args, **kwargs):
         if Logger.OUTPUT_FILE is None:
+            # Make sure the line is empty of any progress before printing
+            print("\033[K", end="")
             print(*args, **kwargs)
         else:
             print(*args, **kwargs, file=Logger.OUTPUT_FILE)
