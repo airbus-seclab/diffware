@@ -8,13 +8,13 @@ The minimal install doesn't allow for automatic file extraction, but can work on
 
 `argcomplete` is used to provide autocompletion, if possible:
 
-```
+```bash
 pip3 install argcomplete
 ```
 
 `fact_helper_file` provides filemagick and config parsing helpers:
 
-```
+```bash
 git clone https://github.com/fkie-cad/fact_helper_file.git
 cd fact_helper_file
 pip3 install .
@@ -22,13 +22,13 @@ pip3 install .
 
 `tlsh` enables to compute distances between files and identify moved files:
 
-```
+```bash
 pip3 install tlsh
 ```
 
 All that is left is to clone this repository:
 
-```
+```bash
 git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
 cd ~/difftool
 ```
@@ -40,7 +40,7 @@ The full install adds an automatic extraction tool.
 
 Install `fact_extractor` from [this branch](https://github.com/JRomainG/fact_extractor/tree/dev):
 
-```
+```bash
 git clone https://github.com/JRomainG/fact_extractor.git ~/fact_extractor
 cd ~/fact_extractor
 fact_extractor/install/pre_install.sh
@@ -49,20 +49,20 @@ fact_extractor/install.py
 
 Make sure the `tlsh` and `argcomplete` are installed:
 
-```
+```bash
 pip3 install tlsh argcomplete
 ```
 
 Finally, clone this repository:
 
-```
+```bash
 git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
 cd ~/difftool
 ```
 
 ## Usage
 
-```
+```bash
 ./main.py -h
 
 usage: main.py [-h] [-o DATA_FILE] [-L {DEBUG,INFO,WARNING,ERROR}] [-d] [-C CONFIG_FILE] [-j JOBS] [--exclude GLOB_PATTERN] [--exclude-mime GLOB_PATTERN] [--blacklist MIME_TYPE]
@@ -170,3 +170,15 @@ You should also try to exclude as many files as possible, either based on their 
 If folders have been renamed (apart from the root file), try to rename them so they match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
 
 You can also tweak the `blacklist` option from the config file to prevent unpacking attempts of known mime-types for which it's unnecessary.
+
+## Tools
+
+### Diffoscope
+
+The output of this script can be parsed to run [diffoscope](https://diffoscope.org/) on the identified changes:
+
+```bash
+./tools/diffoscope.py path-to-output-diff
+```
+
+Any option other than the path to the file will be passed to `diffoscope`. When possible, the modified files won't be copied, but a hardlink will be created in a temporary folder.
