@@ -6,7 +6,13 @@
 
 The minimal install doesn't allow for automatic file extraction, but can work on already extracted files and directories.
 
-The `fact_helper_file` provides filemagick and config parsing helpers:
+`argcomplete` is used to provide autocompletion, if possible:
+
+```
+pip3 install argcomplete
+```
+
+`fact_helper_file` provides filemagick and config parsing helpers:
 
 ```
 git clone https://github.com/fkie-cad/fact_helper_file.git
@@ -14,7 +20,7 @@ cd fact_helper_file
 pip3 install .
 ```
 
-The `tlsh` module enables to compute distances between files and identify moved files:
+`tlsh` enables to compute distances between files and identify moved files:
 
 ```
 pip3 install tlsh
@@ -41,10 +47,10 @@ fact_extractor/install/pre_install.sh
 fact_extractor/install.py
 ```
 
-Make sure the `tlsh` is installed:
+Make sure the `tlsh` and `argcomplete` are installed:
 
 ```
-pip3 install tlsh
+pip3 install tlsh argcomplete
 ```
 
 Finally, clone this repository:
@@ -156,6 +162,7 @@ You should also try to exclude as many files as possible, either based on their 
 ```
 
 ... or based on their path:
+
 ```
 --exclude */build/* --exclude *.txt --exclude *.json
 ```
