@@ -82,7 +82,7 @@ class ElfCodeSectionCommand(Command):
 
         # Match addresses that have been resolved to a symbol
         # First, parse lines that look like:
-        # "​callq 4f60 <call_gmon_start>"
+        # "callq 4f60 <call_gmon_start>"
         regex_list.append(Regex(rb"\b([0-9a-f]+)(?=\s+\<\S+\>)", b""))
 
         # Then, parse lines that look like:
