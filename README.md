@@ -62,7 +62,7 @@ cd ~/difftool
 
 ## Usage
 
-```bash
+```
 ./main.py -h
 
 usage: main.py [-h] [-o DATA_FILE] [-L {DEBUG,INFO,WARNING,ERROR}] [-d] [-C CONFIG_FILE] [-j JOBS] [--exclude GLOB_PATTERN] [--exclude-mime GLOB_PATTERN] [--blacklist MIME_TYPE]
@@ -153,7 +153,17 @@ Here's a list of options that can be set in the config file:
 
 ## Optimizing
 
-For faster analysis, first extract all the necessary files, and then use the `--no-extract` and `--no-specialize` options
+### Extracting
+
+For faster analysis, you should try to avoid extracting files on every run by using the `--no-extract` option. Since the tool can work on directories, you can either manually extract the content beforehand, or run the script once and then run it again on the extracted folder.
+
+### Specializing
+
+Some types of files have specific comparing mechanisms to make the output more robust. As this can add significant overhead, they can be disabled using the `--no-specialize` option.
+
+Disabling this option has the side effect of making the comparison tool follow symlinks. Though it shouldn't fail regardless of what the link points to, it may result in symlinks being reported as different and timeouts being shown while reading from them. In that case, you may want to ignore symlinks by using the `--exclude-mime inode/symlink` option.
+
+### Ignoring files
 
 You should also try to exclude as many files as possible, either based on their mime-type:
 
@@ -167,9 +177,11 @@ You should also try to exclude as many files as possible, either based on their 
 --exclude */build/* --exclude *.txt --exclude *.json
 ```
 
-If folders have been renamed (apart from the root file), try to rename them so they match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
-
 You can also tweak the `blacklist` option from the config file to prevent unpacking attempts of known mime-types for which it's unnecessary.
+
+### Saving time for moved detection
+
+If folders have been renamed (apart from the root file), try renaming them so the overall hierarchy of both files match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
 
 ## Tools
 
