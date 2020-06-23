@@ -7,7 +7,7 @@ from profiler import Profiler
 from utils import get_file_type, get_file_size, read_timeout
 
 
-class UnpackedFile(object):
+class UnpackedFile:
     # Regex describing the filemagic to match for this class
     recognize_regex = re.compile(r".*")
 

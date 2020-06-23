@@ -9,7 +9,7 @@ from profiler import Profiler
 from utils import get_file_type, compute_distance
 
 
-class FilesetComparator(object):
+class FilesetComparator:
     """
     Class comparing lists of files to identify new files, removed files,
     renamed files...

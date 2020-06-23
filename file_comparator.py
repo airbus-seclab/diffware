@@ -5,8 +5,8 @@ import subprocess
 from profiler import Profiler
 
 
-class FileComparator(object):
-    TMP_DIR = None
+class FileComparator:
+    TMP_DIR = tempfile.TemporaryDirectory(prefix="difftool_")
 
     @staticmethod
     def are_equal(file1, file2):
@@ -35,24 +35,13 @@ class FileComparator(object):
         ) == 0
 
     @classmethod
-    def tmp_dir(self):
-        """
-        Used to create a temporary directory that should be cleaned up after the
-        script is done (remember to call cleanup)
-        """
-        if not self.TMP_DIR:
-            self.TMP_DIR = tempfile.TemporaryDirectory(prefix="difftool_")
-        return self.TMP_DIR
-
-    @classmethod
     def tmp_file_path(self):
         """
         Used to create a temporary file that should be cleaned up after the
         script is done (remember to call cleanup)
         """
-        return tempfile.mktemp(dir=self.tmp_dir().name)
+        return tempfile.mktemp(dir=self.TMP_DIR.name)
 
     @classmethod
     def cleanup(self):
-        if self.TMP_DIR:
-            self.TMP_DIR.cleanup()
+        self.TMP_DIR.cleanup()
