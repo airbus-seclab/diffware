@@ -75,11 +75,14 @@ def _copy_if_necessary(file_path, source_folder, destination_folder):
         return file_path
 
 
-def _delete_if_necessary(file_path, source_folder):
+def _delete_if_necessary(file_path, config):
     """
-    Delete the given file, if it's not in the source_folder
+    Delete the given file, if user asked to and if it's not in the source_folder
     """
-    if pathlib.Path(source_folder) in file_path.parents:
+    if not config.clean_extracted:
+        return
+
+    if pathlib.Path(config.source_folder) in file_path.parents:
         return
 
     os.remove(file_path)
@@ -134,7 +137,7 @@ def _extract(file_path, unpacker, config, depth=0):
         yield files.generic.UnpackedFile(path, config.data_folder)
     else:
         # Since the content was extracted, we can delete this file
-        _delete_if_necessary(file_path, config.source_folder)
+        _delete_if_necessary(file_path, config)
 
 
 def _walk(file_path, config):

@@ -35,6 +35,7 @@ class Config(ConfigParser):
             "show_progress": True,
             "sort_order": "none",
             "min_dist": -1,
+            "clean_extracted": False,
             "statistics": False,
             "profile": False,
             "FILE_PATH_1": None,
@@ -143,9 +144,9 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("-C", "--config_file", help="Path to config File", default=default_config_path())
     parser.add_argument("-j", "--jobs", help="Number of job to run in parallel (default is number of cpus)", type=int, default=None)
     parser.add_argument("--exclude", metavar="GLOB_PATTERN", action="append", help="Exclude files paths that match %(metavar)s.", default=["error/*", "inode/chardevice"])
-    parser.add_argument("--exclude-mime", dest="exclude_mime", metavar="GLOB_PATTERN", action="append", help="Exclude files with mime types that match %(metavar)s.", default=[])
+    parser.add_argument("--exclude-mime", metavar="GLOB_PATTERN", action="append", help="Exclude files with mime types that match %(metavar)s.", default=[])
     parser.add_argument("--blacklist", metavar="MIME_TYPE", action="append", help="Exclude files with %(metavar)s.", default=[])
-    parser.add_argument("--fuzzy-threshold", dest="fuzzy_threshold", help="Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)", type=int, default=None)
+    parser.add_argument("--fuzzy-threshold", help="Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)", type=int, default=None)
     parser.add_argument("--max_depth", help="Maximum depth for recursive unpacking (< 0 for no limit, default is 8)", type=int, default=None)
     parser.add_argument("--no-extract", action="store_false", dest="extract", help="Consider all files are already extracted, and only compare them", default=None)
     parser.add_argument("--no-specialize", action="store_false", dest="specialize", help="Do not use specific content comparison for known file types, but use simple binary data comparison", default=None)
@@ -153,6 +154,7 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("--order-by", dest="sort_order", help="Define the sort order for the output. Note: setting this to anything other than \"none\" will disable progressive output", choices=["none", "path", "distance"], default=None)
     parser.add_argument("--min_dist", help="Ignore files with a difference lower than the one given (< 0 for no limit)", type=int, default=None)
     parser.add_argument("--no-progress", action="store_false", dest="show_progress", help="Hide progress messages", default=None)
+    parser.add_argument("--clean-extracted", action="store_true", help="Delete temporary container files which have been extracted", default=None)
     parser.add_argument("--enable-statistics", action="store_true", dest="statistics", help="Compute statistics or check for unpack data loss", default=None)
     parser.add_argument("--profile", action="store_true", help="Measure the number of calls and time spent in different methods", default=False)
 

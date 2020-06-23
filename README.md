@@ -67,7 +67,7 @@ cd ~/difftool
 
 usage: main.py [-h] [-o DATA_FILE] [-L {DEBUG,INFO,WARNING,ERROR}] [-d] [-C CONFIG_FILE] [-j JOBS] [--exclude GLOB_PATTERN] [--exclude-mime GLOB_PATTERN] [--blacklist MIME_TYPE]
                [--fuzzy-threshold FUZZY_THRESHOLD] [--max_depth MAX_DEPTH] [--no-extract] [--no-specialize] [--no-distance] [--order-by {none,path,distance}] [--min_dist MIN_DIST]
-               [--no-progress] [--enable-statistics] [--profile]
+               [--no-progress] [--clean-extracted] [--enable-statistics] [--profile]
                FILE_PATH_1 FILE_PATH_2
 
 positional arguments:
@@ -101,6 +101,7 @@ optional arguments:
                         Define the sort order for the output. Note: setting this to anything other than "none" will disable progressive output
   --min_dist MIN_DIST   Ignore files with a difference lower than the one given (< 0 for no limit)
   --no-progress         Hide progress messages
+  --clean-extracted     Delete temporary container files which have been extracted
   --enable-statistics   Compute statistics or check for unpack data loss
   --profile             Measure the number of calls and time spent in different methods
 ```
@@ -130,6 +131,7 @@ Here's a list of options that can be set in the config file:
 | sort_order       | "none"        | Define the sort order for the output                         |
 | min_dist         | -1            | Ignore files with a difference lower than the one given (< 0 for no limit) |
 | show_progress    | True          | Whether to output progress messages in the console or not    |
+| clean_extracted  | False         | Delete temporary container files which have been extracted   |
 | profile          | False         | Whether to measure the number of calls and time spent in different methods |
 
 ### `unpack` section
