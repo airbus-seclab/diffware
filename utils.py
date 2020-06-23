@@ -1,5 +1,6 @@
 import os
 import tlsh
+import signal
 import pathlib
 import subprocess
 from functools import wraps
@@ -42,11 +43,11 @@ def get_file_size(path):
 
 def read_timeout(file, bytes=1024, timeout=0):
     """
-    Read the content of a file, and timeout if nothing happens
-    A timeout of 0 means no timeout
+    Read the content of a file, and timeout if nothing happens. This may
+    be useful when reading from a file that turns out to be a device, socket
+    or fifo node
+    A value of "0" for the timeout disables it
     """
-    import signal
-
     def handler(signum, frame):
         Logger.warn("Timed out while reading contents of {}".format(file.name))
         raise TimeoutError()
@@ -56,8 +57,9 @@ def read_timeout(file, bytes=1024, timeout=0):
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(timeout)
 
-    data = file.read(32768)
-    signal.alarm(timeout)
+    # Attempt to read, and then disable the timeout
+    data = file.read(bytes)
+    signal.alarm(0)
 
     return data
 
