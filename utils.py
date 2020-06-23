@@ -7,27 +7,59 @@ from configparser import NoOptionError, NoSectionError
 
 from fact_helper_file import get_file_type_from_path
 
+from logger import Logger
+
 
 def get_file_type(path):
     path = pathlib.Path(path)
 
     # Make sure symlinks aren't followed
     if path.is_symlink():
-        return {"mime": "inode/symlink", "full": ""}
+        return {"mime": "inode/symlink", "full": "symbolic link"}
 
     # get_file_type_from_path would raise IsADirectoryError
     if path.is_dir():
-        return {"mime": "directory", "full": ""}
+        return {"mime": "directory", "full": "directory"}
 
     # Attempting to open this would stay stuck forever
     if path.is_fifo():
-        return {"mime": "inode/fifo", "full": ""}
+        return {"mime": "inode/fifo", "full": "fifo"}
 
     # Don't attempt to open sockets
     if path.is_socket():
-        return {"mime": "inode/socket", "full": ""}
+        return {"mime": "inode/socket", "full": "socket"}
 
     return get_file_type_from_path(path)
+
+
+def get_file_size(path):
+    try:
+        return os.stat(path).st_size
+    except FileNotFoundError:
+        # Broken symlkink?
+        return 0
+
+
+def read_timeout(file, bytes=1024, timeout=0):
+    """
+    Read the content of a file, and timeout if nothing happens
+    A timeout of 0 means no timeout
+    """
+    import signal
+
+    def handler(signum, frame):
+        Logger.warn("Timed out while reading contents of {}".format(file.name))
+        raise TimeoutError()
+
+    # Setup timeout so handler is called if function takes more than
+    # timeout seconds
+    signal.signal(signal.SIGALRM, handler)
+    signal.alarm(timeout)
+
+    data = file.read(32768)
+    signal.alarm(timeout)
+
+    return data
 
 
 def compute_distance(file1, file2):
@@ -44,7 +76,7 @@ def compute_distance(file1, file2):
     # Compute the proportion of bytes changed
     path1 = str(file1.path)
     path2 = str(file2.path)
-    file_size = max(os.path.getsize(path1), os.path.getsize(path2))
+    file_size = max(get_file_size(path1), get_file_size(path2))
 
     try:
         diff_bytes = subprocess.check_output(["cmp", "-l", path1, path2], stderr=subprocess.DEVNULL)

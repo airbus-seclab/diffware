@@ -89,7 +89,7 @@ class FilesetComparator(object):
         files = list(self._missing_files)
 
         with multiprocessing.Pool(self.config.jobs) as pool:
-             matched = pool.map(self._match_file, files)
+            matched = pool.map(self._match_file, files)
 
         for i in range(len(matched)):
             if matched[i] is not None:
@@ -113,14 +113,11 @@ class FilesetComparator(object):
         """
         def generator():
             for file in self._common_files:
-                file1 = self._specialize_file(file)
+                # The matched file may not have been specialized yet
                 file2 = self._specialize_file(file._match)
-                yield (file1, file2)
+                yield (file, file2)
 
-            for pair in self.moved_file_pairs:
-                file1 = self._specialize_file(pair[0])
-                file2 = self._specialize_file(pair[1])
-                yield (file1, file2)
+            yield from self.moved_file_pairs
 
         return generator()
 
@@ -134,7 +131,7 @@ class FilesetComparator(object):
         # Do this in 2 steps (rather than using .intersection) to make
         # sure the elements we get are from file_set1
         diff = self.file_set1 - self.file_set2
-        return self.file_set1 - diff
+        return self._specialize(self.file_set1 - diff)
 
     @cached_property
     @Profiler.profilable
@@ -143,7 +140,7 @@ class FilesetComparator(object):
         Return files which exist in the first set but not the second
         """
         Logger.progress("Finding missing files...")
-        return self.file_set1 - self._common_files
+        return self._specialize(self.file_set1 - self._common_files)
 
     @cached_property
     @Profiler.profilable
@@ -152,7 +149,7 @@ class FilesetComparator(object):
         Return files which exist in the second set but not the first
         """
         Logger.progress("Finding new files...")
-        return self.file_set2 - self._common_files
+        return self._specialize(self.file_set2 - self._common_files)
 
     def _match_file(self, file, file_set=None):
         """
@@ -189,6 +186,20 @@ class FilesetComparator(object):
             return closest_file
 
         return None
+
+    def _specialize(self, file_set):
+        """
+        Specializes all the files in the given set
+        """
+        if not self.config.specialize:
+            return file_set
+
+        specialized_set = set()
+        for file in file_set:
+            Logger.progress("Specializing {}...".format(file.path))
+            specialized_set.add(self._specialize_file(file))
+
+        return specialized_set
 
     def _specialize_file(self, file):
         """

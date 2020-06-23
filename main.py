@@ -65,16 +65,7 @@ def _copy_if_necessary(file_path, source_folder, destination_folder):
         # Keep the same relative path, but from the destination folder
         target_path = pathlib.Path(destination_folder, relative_path)
         os.makedirs(target_path.parent, exist_ok=True)
-
-        if file_path.is_symlink():
-            # Add ".symlink" so it's clear to the user what this is supposed
-            # to be
-            target_path = pathlib.Path(str(target_path) + ".symlink")
-            with open(target_path, "w") as f:
-                f.write("Target: {}".format(os.readlink(file_path)))
-            return target_path
-        else:
-            return shutil.copy(file_path, target_path)
+        return shutil.copy(file_path, target_path, follow_symlinks=False)
     except ValueError:
         # relative_to will fail for files which are not located in the
         # source_folder (so they must be in the destination_folder)
