@@ -305,10 +305,11 @@ def compare_files(file_set1, file_set2, config):
         Logger.output("\nRemoved: {}".format(removed.path))
 
     # Print overall statistics
-    Logger.info("Found {} added files, {} removed files and {} changed files".format(
+    Logger.info("Found {} added files, {} removed files and {} changed files ({} files in total)".format(
         added_count,
         removed_count,
-        len(edits)
+        len(edits),
+        added_count + removed_count + len(edits)
     ))
 
 
