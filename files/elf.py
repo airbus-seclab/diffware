@@ -14,8 +14,8 @@ from files.analyzer import Analyzer, Command, Regex
 
 
 class ElfAnalyzer(Analyzer):
-    def __init__(self, path):
-        super().__init__(path)
+    def __init__(self, path, config):
+        super().__init__(path, config)
         self.code_sections = []
         self.data_sections = []
 
@@ -29,8 +29,8 @@ class ElfAnalyzer(Analyzer):
             self.data_sections.append(section_name)
 
     def run(self):
-        section_output = ElfSectionCommand.run(self.path, self.data_sections)
-        code_output = ElfCodeSectionCommand.run(self.path, self.code_sections)
+        section_output = ElfSectionCommand.run(self.path, self.config, self.data_sections)
+        code_output = ElfCodeSectionCommand.run(self.path, self.config, self.code_sections)
         return itertools.chain(section_output, code_output)
 
 
@@ -58,7 +58,7 @@ class ElfSectionCommand(Command):
         return ["--decompress"]
 
     @classmethod
-    def make_cmd(self, file, sections):
+    def make_cmd(self, file, config, sections):
         # Don't run a command if there are no sections
         if not sections:
             return
@@ -71,11 +71,20 @@ class ElfSectionCommand(Command):
 
         return ["readelf", *cmd, file]
 
+    @classmethod
+    @Profiler.profilable
+    def run(self, *args, **kwargs):
+        return super().run(*args, **kwargs)
+
 
 class ElfCodeSectionCommand(Command):
     @classmethod
     def make_regex(self, path):
         regex_list = []
+
+        # Match the full path to the file
+        path = re.escape(path.encode("utf-8"))
+        regex_list.append(Regex(rb"%s\b" % path, b"/file"))
 
         # Match the leading hex value (offset of the instruction)
         regex_list.append(Regex(rb"^\s*[0-9a-f]+:\s*", b""))
@@ -96,7 +105,7 @@ class ElfCodeSectionCommand(Command):
         return ["--disassemble", "--demangle", "--reloc", "--no-show-raw-insn"]
 
     @classmethod
-    def make_cmd(self, file, sections):
+    def make_cmd(self, file, config, sections):
         # Don't run a command if there are no sections
         if not sections:
             return
@@ -107,7 +116,13 @@ class ElfCodeSectionCommand(Command):
         for section in sections:
             cmd += ["-j", section]
 
-        return ["readelf", *cmd, file]
+        exec = config.binutils_prefix + "objdump"
+        return [exec, *cmd, file]
+
+    @classmethod
+    @Profiler.profilable
+    def run(self, *args, **kwargs):
+        return super().run(*args, **kwargs)
 
 
 class ElfFile(UnpackedFile):
@@ -160,7 +175,7 @@ class ElfFile(UnpackedFile):
         """
         Inspired by diffoscope/comparator/elf.py ElfContainer
         """
-        self._analyzer = ElfAnalyzer(file)
+        self._analyzer = ElfAnalyzer(file, self.config)
 
         # Get all the sections in this file to pass them to the analyzer
         cmd = [

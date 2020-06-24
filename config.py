@@ -35,6 +35,7 @@ class Config(ConfigParser):
             "show_progress": True,
             "sort_order": "none",
             "min_dist": -1,
+            "binutils_prefix": "",
             "clean_extracted": False,
             "statistics": False,
             "profile": False,
@@ -153,6 +154,7 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("--no-distance", action="store_false", dest="compute_distance", help="Disable computing the distance between two modified files using TLSH", default=None)
     parser.add_argument("--order-by", dest="sort_order", help="Define the sort order for the output. Note: setting this to anything other than \"none\" will disable progressive output", choices=["none", "path", "distance"], default=None)
     parser.add_argument("--min_dist", help="Ignore files with a difference lower than the one given (< 0 for no limit)", type=int, default=None)
+    parser.add_argument("--binutils-prefix", help="Prefix for binutils program names (for example, \"aarch64-linux-gnu-\").", default=None)
     parser.add_argument("--no-progress", action="store_false", dest="show_progress", help="Hide progress messages", default=None)
     parser.add_argument("--clean-extracted", action="store_true", help="Delete temporary container files which have been extracted", default=None)
     parser.add_argument("--enable-statistics", action="store_true", dest="statistics", help="Compute statistics or check for unpack data loss", default=None)

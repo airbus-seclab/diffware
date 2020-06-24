@@ -136,7 +136,7 @@ def _extract(file_path, unpacker, config, depth=0):
         # If no files were extracted, at least return this file
         # _copy_if_necessary takes care of handling symlinks
         path = _copy_if_necessary(file_path, config.source_folder, config.data_folder)
-        yield files.generic.UnpackedFile(path, config.data_folder)
+        yield files.generic.UnpackedFile(path, config, config.data_folder)
     else:
         # Since the content was extracted, we can delete this file
         _delete_if_necessary(file_path, config)
@@ -191,10 +191,10 @@ def list_files(file_path, config):
     if file_path.is_dir():
         data_folder = file_path
         for path in _walk(file_path, config):
-            yield files.generic.UnpackedFile(path, data_folder)
+            yield files.generic.UnpackedFile(path, config, data_folder)
     else:
         data_folder = file_path.parent
-        yield files.generic.UnpackedFile(file_path, data_folder)
+        yield files.generic.UnpackedFile(file_path, config, data_folder)
 
 
 def get_extracted_files(file_path1, file_path2, config):

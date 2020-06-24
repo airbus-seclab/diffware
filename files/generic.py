@@ -11,8 +11,9 @@ class UnpackedFile:
     # Regex describing the filemagic to match for this class
     recognize_regex = re.compile(r".*")
 
-    def __init__(self, path, data_folder="/"):
+    def __init__(self, path, config, data_folder="/"):
         self.path = path
+        self.config = config
         self._data_folder = data_folder
         self._match = None
 

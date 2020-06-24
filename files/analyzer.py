@@ -6,8 +6,9 @@ from profiler import Profiler
 
 
 class Analyzer:
-    def __init__(self, path):
+    def __init__(self, path, config):
         self.path = path
+        self.config = config
 
     def run(self):
         """
@@ -54,7 +55,7 @@ class Command:
         return []
 
     @classmethod
-    def make_cmd(self, file):
+    def make_cmd(self, file, config):
         """
         Returns a list, as accepted by subprocess.run, of strings to run
         this command for the given file
@@ -62,10 +63,11 @@ class Command:
         raise NotImplementedError
 
     @classmethod
-    @Profiler.profilable
     def run(self, file, *args, **kwargs):
         """
         Run this command and return a generator of filtered output lines
+        Note: This is not profilable so subclasses should override it to make
+        sure it's taken into account by --profile
         """
         regex = self.make_regex(file)
         cmd = self.make_cmd(file, *args, **kwargs)
@@ -80,8 +82,15 @@ class Command:
             shell=False,
             close_fds=True,
             stdout=subprocess.PIPE,
-            stderr=subprocess.DEVNULL
+            stderr=subprocess.PIPE
         )
+
+        if process.stderr:
+            text = "Error while running command \"{}\": {}".format(
+                " ".join(cmd),
+                process.stderr.decode("utf-8")
+            )
+            Logger.warn(text)
 
         return self._filter(process.stdout.splitlines(True), regex)
 
