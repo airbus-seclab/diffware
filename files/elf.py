@@ -9,6 +9,7 @@ from functools import cached_property
 from logger import Logger
 from profiler import Profiler
 from .generic import UnpackedFile
+from utils import compute_fuzzy_hash
 from file_comparator import FileComparator
 from files.analyzer import Analyzer, Command, Regex
 
@@ -145,6 +146,12 @@ class ElfFile(UnpackedFile):
         "<no-strings>",
         "<corrupt>"
     ]
+
+    @cached_property
+    def fuzzy_hash(self):
+        # Compute the hash on the whole file, as it saves time and it's pretty
+        # unnecessary to compute the hash on only some sections
+        return compute_fuzzy_hash(self, self.path)
 
     @cached_property
     def _comparable_path(self):

@@ -4,7 +4,7 @@ import tlsh
 from functools import cached_property
 
 from profiler import Profiler
-from utils import get_file_type, get_file_size, read_timeout
+from utils import get_file_type, get_file_size, read_timeout, compute_fuzzy_hash
 
 
 class UnpackedFile:
@@ -63,10 +63,17 @@ class UnpackedFile:
         return self.path
 
     @Profiler.profilable
-    def _read(self):
+    def _read(self, path=None):
+        """
+        Read the content of this file
+        Setting path will override the default behavior of computing a
+        comparable path and then using it to read the contents of the file
+        """
+        path = path or self._comparable_path
+
         def generator():
             try:
-                with open(self._comparable_path, "rb") as f:
+                with open(path, "rb") as f:
                     for buf in iter(lambda: read_timeout(f, 32768, 5), b""):
                         yield buf
             except TimeoutError:
@@ -76,19 +83,4 @@ class UnpackedFile:
 
     @cached_property
     def fuzzy_hash(self):
-        """
-        cf diffoscope/comparators/utils/file.py
-        """
-        # tlsh is not meaningful with files smaller than 512 bytes
-        if get_file_size(self._comparable_path) >= 512:
-            h = tlsh.Tlsh()
-            for buf in self._read():
-                h.update(buf)
-            h.final()
-            try:
-                return h.hexdigest()
-            except ValueError:
-                # File must contain a certain amount of randomness.
-                pass
-
-        return None
+        return compute_fuzzy_hash(self, self._comparable_path)

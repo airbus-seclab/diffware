@@ -41,7 +41,7 @@ def get_file_size(path):
         return 0
 
 
-def read_timeout(file, bytes=1024, timeout=0):
+def read_timeout(file_handle, bytes=1024, timeout=0):
     """
     Read the content of a file, and timeout if nothing happens. This may
     be useful when reading from a file that turns out to be a device, socket
@@ -58,10 +58,31 @@ def read_timeout(file, bytes=1024, timeout=0):
     signal.alarm(timeout)
 
     # Attempt to read, and then disable the timeout
-    data = file.read(bytes)
+    data = file_handle.read(bytes)
     signal.alarm(0)
 
     return data
+
+
+def compute_fuzzy_hash(file, path):
+    """
+    Compute the fuzzy hash of the given file
+    cf diffoscope/comparators/utils/file.py
+    """
+    # tlsh is not meaningful with files smaller than 512 bytes
+    if get_file_size(path) >= 512:
+        h = tlsh.Tlsh()
+        for buf in file._read(path):
+            h.update(buf)
+        h.final()
+
+        try:
+            return h.hexdigest()
+        except ValueError:
+            # File must contain a certain amount of randomness.
+            return None
+
+    return None
 
 
 def compute_distance(file1, file2):
