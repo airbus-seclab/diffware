@@ -2,11 +2,15 @@ import os
 import tempfile
 import subprocess
 
-from profiler import Profiler
-from utils import get_file_size
+from .profiler import Profiler
+from .utils import get_file_size
 
 
 class FileComparator:
+    """
+    Class comparing two given files, and handling temporary file paths generated
+    for this comparison
+    """
     TMP_DIR = tempfile.TemporaryDirectory(prefix="difftool_")
 
     @staticmethod

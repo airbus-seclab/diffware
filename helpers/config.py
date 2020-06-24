@@ -5,13 +5,13 @@ import argcomplete
 import multiprocessing
 from configparser import ConfigParser
 
-from logger import Logger
-from utils import read_list_from_config
+from .logger import Logger
+from .utils import read_list_from_config
 
 
 def default_config_path():
     current_dir = pathlib.Path(__file__).parent.absolute()
-    return current_dir / "config.cfg"
+    return current_dir.parent / "config.cfg"
 
 
 class Config(ConfigParser):

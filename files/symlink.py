@@ -3,7 +3,8 @@ import re
 from functools import cached_property
 
 from .generic import UnpackedFile
-from file_comparator import FileComparator
+
+from helpers.file_comparator import FileComparator
 
 
 class SymlinkFile(UnpackedFile):

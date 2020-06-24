@@ -4,9 +4,9 @@ import multiprocessing
 from functools import cached_property
 
 import files
-from logger import Logger
-from profiler import Profiler
-from utils import get_file_type, compute_distance
+from .logger import Logger
+from .profiler import Profiler
+from .utils import get_file_type, compute_distance
 
 
 class FilesetComparator:

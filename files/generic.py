@@ -3,9 +3,14 @@ import re
 import tlsh
 from functools import cached_property
 
-from profiler import Profiler
-from file_comparator import FileComparator
-from utils import get_file_type, get_file_size, read_timeout, compute_fuzzy_hash
+from helpers.profiler import Profiler
+from helpers.file_comparator import FileComparator
+from helpers.utils import (
+    get_file_type,
+    get_file_size,
+    read_timeout,
+    compute_fuzzy_hash
+)
 
 
 class UnpackedFile:

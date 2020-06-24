@@ -1,3 +1,5 @@
+# The `files` folder contains classes used to represent specialized files,
+# as well as classes needed to analyze their contents
 from . import elf, symlink
 
 

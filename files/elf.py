@@ -6,12 +6,13 @@ import subprocess
 import collections
 from functools import cached_property
 
-from logger import Logger
-from profiler import Profiler
 from .generic import UnpackedFile
-from utils import compute_fuzzy_hash
-from file_comparator import FileComparator
-from files.analyzer import Analyzer, Command, Regex
+from .analyzer import Analyzer, Command, Regex
+
+from helpers.logger import Logger
+from helpers.profiler import Profiler
+from helpers.utils import compute_fuzzy_hash
+from helpers.file_comparator import FileComparator
 
 
 class ElfAnalyzer(Analyzer):

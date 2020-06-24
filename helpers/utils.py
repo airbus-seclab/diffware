@@ -8,7 +8,7 @@ from configparser import NoOptionError, NoSectionError
 
 from fact_helper_file import get_file_type_from_path
 
-from logger import Logger
+from .logger import Logger
 
 
 def get_file_type(path):

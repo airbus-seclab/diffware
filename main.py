@@ -25,12 +25,12 @@ except ModuleNotFoundError:
     FACT_FOUND = False
 
 import files
-from config import make_config
-from logger import Logger
-from profiler import Profiler
-from file_comparator import FileComparator
-from fileset_comparator import FilesetComparator
-from utils import get_file_type, read_list_from_config
+from helpers.config import make_config
+from helpers.logger import Logger
+from helpers.profiler import Profiler
+from helpers.file_comparator import FileComparator
+from helpers.fileset_comparator import FilesetComparator
+from helpers.utils import get_file_type, read_list_from_config
 
 
 @lru_cache(maxsize=128, typed=False)
