@@ -4,6 +4,7 @@ import tlsh
 from functools import cached_property
 
 from profiler import Profiler
+from file_comparator import FileComparator
 from utils import get_file_type, get_file_size, read_timeout, compute_fuzzy_hash
 
 
@@ -50,6 +51,15 @@ class UnpackedFile:
         Whether this class can be used to analyze files with the given type
         """
         return self.recognize_regex.match(file_type["full"])
+
+    def has_same_content_as(self, other):
+        """
+        Check whether this file as the same content as another file
+        """
+        return FileComparator._compare_files(
+            self, self._comparable_path,
+            other, other._comparable_path
+        )
 
     @cached_property
     @Profiler.profilable

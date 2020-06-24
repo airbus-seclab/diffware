@@ -153,6 +153,26 @@ class ElfFile(UnpackedFile):
         # unnecessary to compute the hash on only some sections
         return compute_fuzzy_hash(self, self.path)
 
+    def has_same_content_as(self, other):
+        # For ELF files, since objdump and readelf are pretty slow, first
+        # do a quicker compare before calling those tools
+        quick_compare = FileComparator._compare_files(
+            self, self.path,
+            other, other.path
+        )
+
+        if quick_compare:
+            # Since both files are exactly the same, there is not need to
+            # compare any further
+            return True
+
+        # Files seem different, but maybe they're not really, so call
+        # readelf and objdump
+        return FileComparator._compare_files(
+            self, self._comparable_path,
+            other, other._comparable_path
+        )
+
     @cached_property
     def _comparable_path(self):
         # Use readelf and objdump to extract the useful info and write it to

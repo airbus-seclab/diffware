@@ -33,12 +33,16 @@ def get_file_type(path):
     return get_file_type_from_path(path)
 
 
-def get_file_size(path):
+def get_file_size(path, default=0):
+    """
+    Return the size of the file at the given path
+    default will be returned if FileNotFoundError is raised
+    """
     try:
         return os.stat(path).st_size
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         # Broken symlkink?
-        return 0
+        return default
 
 
 def read_timeout(file_handle, bytes=1024, timeout=0):
