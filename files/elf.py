@@ -130,6 +130,10 @@ class ElfCodeSectionCommand(Command):
 class ElfFile(UnpackedFile):
     recognize_regex = re.compile(r"^ELF\s")
 
+    # Match section lines in the output of readelf
+    # Header looks something like "  [ 1]"
+    elf_section_regex = re.compile(r"^\s*\[\s*\d+\]")
+
     # Ignore sections that are not included in this list
     # See https://refspecs.linuxfoundation.org/LSB_2.1.0/LSB-Core-generic/LSB-Core-generic/specialsections.html
     KEEP_SECTIONS = [
@@ -218,15 +222,12 @@ class ElfFile(UnpackedFile):
 
         try:
             output = output.decode("utf-8").split("\n")
-            if output[1].startswith("File:"):
-                output = output[2:]
-            output = output[5:]
 
             # Entries of readelf --section-headers have the following columns:
             # [Nr]  Name  Type  Address  Off  Size  ES  Flg  Lk  Inf  Al
             for line in output:
-                if line.startswith("Key to Flags"):
-                    break
+                if not self.elf_section_regex.match(line):
+                    continue
 
                 # Strip number column because there may be spaces in the brakets
                 line = line.split("]", 1)[1].split()
@@ -237,5 +238,4 @@ class ElfFile(UnpackedFile):
 
                 self._analyzer.add_section(name, flags)
         except Exception as e:
-            Logger.error("error in _load_sections", e)
-            pass
+            Logger.error("error in _load_sections: {}".format(e))
