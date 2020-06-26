@@ -114,5 +114,5 @@ class Logger():
             # Probably redirecting output to file or process
             max_size = 128
 
-        format = "\033[37m{:<" + str(max_size) + "." + str(max_size) + "}\033[0m"
+        format = "\033[2m{:<" + str(max_size) + "." + str(max_size) + "}\033[0m"
         print(format.format(string), end="\r")
