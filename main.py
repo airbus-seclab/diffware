@@ -18,7 +18,9 @@ from functools import lru_cache
 try:
     # Try to import fact_extractor if possible, otherwise
     # disable unpacking
-    sys.path.append("../fact_extractor/fact_extractor")
+    current_dir = pathlib.Path(__file__).parent.absolute()
+    fact_dir = current_dir.parent / "fact_extractor" / "fact_extractor"
+    sys.path.append(str(fact_dir))
     from unpacker.unpack import Unpacker
     FACT_FOUND = True
 except ModuleNotFoundError:
