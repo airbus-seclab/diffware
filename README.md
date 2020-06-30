@@ -1,5 +1,16 @@
 # Difftool
 
+The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and it can be combined with tools like [diffoscope](https://diffoscope.org).
+
+## Table of content
+
+1. [Installing](#installing)
+2. [Usage](#usage)
+3. [Configuration](#configuration)
+4. [Optimizing](#optimizing)
+5. [Tools](#tools)
+6. [Example](#example)
+
 ## Installing
 
 ### Minimal
@@ -197,3 +208,50 @@ The output of this script can be parsed to run [diffoscope](https://diffoscope.o
 ```
 
 Any option other than the path to the file will be passed to `diffoscope`. When possible, the modified files won't be copied, but a hardlink will be created in a temporary folder.
+
+## Example
+
+Here's an example of using the tool to find the differences between two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful example of how this tool can be used.
+
+Here's the result of comparing the `rootfs-squashfs.img.gz` of versions [19.07.2](https://downloads.openwrt.org/releases/19.07.2/targets/x86/64/) and [19.07.3](https://downloads.openwrt.org/releases/19.07.3/targets/x86/64/) for the x86-64 architecture:
+
+```bash
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs.img.gz ~/openwrt-19.07.3-x86-64-rootfs-squashfs.img.gz --output /dev/null
+[WARNING] Found 1949 files with different paths (and 0 with similar paths), looking for moved files may take a while. Did a folder name change?
+```
+
+As you can see, the files have been decompressed and the squashfs filesystem read automatically by [fact_extractor](https://github.com/fkie-cad/fact_extractor). The extracted files should be available in `/tmp/extractor1/files` and `/tmp/extractor2/files`. However, a warning shows that no files with similar paths have been found.
+
+This is because the folder extracted from the archive contains the version number. Thankfully, this is easy to fix. Let's just run the script again on the extracted subfolders, which have the same hierachy:
+
+```bash
+$ mv /tmp/extractor1/files/openwrt-19.07.2-x86-64-rootfs-squashfs.img_extracted ~/openwrt-19.07.2-x86-64-rootfs-squashfs
+$ mv /tmp/extractor2/files/openwrt-19.07.3-x86-64-rootfs-squashfs.img_extracted ~/openwrt-19.07.3-x86-64-rootfs-squashfs
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract
+Found 12 added files, 28 removed files and 239 changed files (279 files in total)
+```
+
+Much better! When looking at the output, we notice quite a few images, which we'd like to exclude. We can run the script again:
+
+```bash
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime image/*
+Found 12 added files, 9 removed files and 232 changed files (253 files in total)
+```
+
+Once again, better. There are some changes related to package versions, we can also decide to exclude them:
+
+```bash
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime image/* --exclude *.control
+Found 12 added files, 9 removed files and 125 changed files (146 files in total)
+```
+
+Now that we're happy with the output, we can save it to a file and run [diffoscope](https://diffoscope.org/) to dive into the changes:
+
+```bash
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime image/* --exclude *.control --output ~/openwrt-19.07.2_vs_19.07.3.diff
+$ ./tools/diffoscope.py ~/openwrt-19.07.2_vs_19.07.3.diff --html-dir ~/openwrt-diff --exclude-command "^stat .*"
+```
+
+**Note:** The `--exclude-command` option of diffoscope is not mandatory, but it makes the output less noisy. `--diff-mask` can also prove quite useful to ignore versions strings or dates for example.
+
+These options can then be saved to a configuration file and later reused for other versions of OpenWRT so this work doesn't have to be done each time.
