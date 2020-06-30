@@ -17,11 +17,11 @@ class CustomFormatter(logging.Formatter):
     format = "%(message)s"
 
     FORMATS = {
-        logging.DEBUG: gray + format + reset,
-        logging.INFO: format,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
+        logging.DEBUG: gray + "[DEBUG] %(message)s" + reset,
+        logging.INFO: "%(message)s",
+        logging.WARNING: yellow + "[WARNING] %(message)s" + reset,
+        logging.ERROR: red + "[ERROR] %(message)s" + reset,
+        logging.CRITICAL: bold_red + "[CRITICAL] %(message)s" + reset
     }
 
     def format(self, record):
