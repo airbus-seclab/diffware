@@ -69,41 +69,41 @@ usage: main.py [-h] [-o DATA_FILE] [-L {DEBUG,INFO,WARNING,ERROR}] [-d] [-C CONF
                FILE_PATH_1 FILE_PATH_2
 
 positional arguments:
-  FILE_PATH_1           Path to first file
-  FILE_PATH_2           Path to second file
+ FILE_PATH_1           Path to first file
+ FILE_PATH_2           Path to second file
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -o DATA_FILE, --output DATA_FILE
-                        Path to file in which to write the list of files (- for stdout)
-  -L {DEBUG,INFO,WARNING,ERROR}, --log_level {DEBUG,INFO,WARNING,ERROR}
-                        Define the log level
-  -d, --debug           Print debug messages
-  -C CONFIG_FILE, --config_file CONFIG_FILE
-                        Path to config File
-  -j JOBS, --jobs JOBS  Number of job to run in parallel (default is number of cpus)
-  --exclude GLOB_PATTERN
-                        Exclude files paths that match GLOB_PATTERN.
-  --exclude-mime GLOB_PATTERN
-                        Exclude files with mime types that match GLOB_PATTERN.
-  --blacklist MIME_TYPE
-                        Exclude files with MIME_TYPE.
-  --fuzzy-threshold FUZZY_THRESHOLD
-                        Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)
-  --max_depth MAX_DEPTH
-                        Maximum depth for recursive unpacking (< 0 for no limit, default is 8)
-  --no-extract          Consider all files are already extracted, and only compare them
-  --no-specialize       Do not use specific content comparison for known file types, but use simple binary data comparison
-  --no-distance         Disable computing the distance between two modified files using TLSH
-  --order-by {none,path,distance}
-                        Define the sort order for the output. Note: setting this to anything other than "none" will disable progressive output
-  --min_dist MIN_DIST   Ignore files with a difference lower than the one given (< 0 for no limit)
-  --binutils-prefix BINUTILS_PREFIX
-                        Prefix for binutils program names (for example, "aarch64-linux-gnu-").
-  --no-progress         Hide progress messages
-  --clean-extracted     Delete temporary container files which have been extracted
-  --enable-statistics   Compute statistics or check for unpack data loss
-  --profile             Measure the number of calls and time spent in different methods
+ -h, --help            show this help message and exit
+ -o DATA_FILE, --output DATA_FILE
+                       Path to file in which to write the list of files (- for stdout)
+ -L {DEBUG,INFO,WARNING,ERROR}, --log_level {DEBUG,INFO,WARNING,ERROR}
+                       Define the log level
+ -d, --debug           Print debug messages
+ -C CONFIG_FILE, --config_file CONFIG_FILE
+                       Path to config File
+ -j JOBS, --jobs JOBS  Number of job to run in parallel (default is number of cpus)
+ --exclude GLOB_PATTERN
+                       Exclude files paths that match GLOB_PATTERN.
+ --exclude-mime GLOB_PATTERN
+                       Exclude files with mime types that match GLOB_PATTERN.
+ --blacklist MIME_TYPE
+                       Don't attempt to extract files that match MIME_TYPE (unused when combined with --no-extract).
+ --fuzzy-threshold FUZZY_THRESHOLD
+                       Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)
+ --max_depth MAX_DEPTH
+                       Maximum depth for recursive unpacking (< 0 for no limit, default is 8)
+ --no-extract          Consider all files are already extracted, and only compare them
+ --no-specialize       Do not use specific content comparison for known file types, but use simple binary data comparison
+ --no-distance         Disable computing the distance between two modified files using TLSH
+ --order-by {none,path,distance}
+                       Define the sort order for the output. Note: setting this to anything other than "none" will disable progressive output
+ --min_dist MIN_DIST   Ignore files with a difference lower than the one given (< 0 for no limit)
+ --binutils-prefix BINUTILS_PREFIX
+                       Prefix for binutils program names (for example, "aarch64-linux-gnu-").
+ --no-progress         Hide progress messages
+ --clean-extracted     Delete temporary container files which have been extracted
+ --enable-statistics   Compute statistics or check for unpack data loss
+ --profile             Measure the number of calls and time spent in different methods
 ```
 
 ## Configuration

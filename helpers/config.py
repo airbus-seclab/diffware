@@ -146,7 +146,7 @@ def setup_argparser(name, description, command_line_options):
     parser.add_argument("-j", "--jobs", help="Number of job to run in parallel (default is number of cpus)", type=int, default=None)
     parser.add_argument("--exclude", metavar="GLOB_PATTERN", action="append", help="Exclude files paths that match %(metavar)s.", default=["error/*", "inode/chardevice"])
     parser.add_argument("--exclude-mime", metavar="GLOB_PATTERN", action="append", help="Exclude files with mime types that match %(metavar)s.", default=[])
-    parser.add_argument("--blacklist", metavar="MIME_TYPE", action="append", help="Exclude files with %(metavar)s.", default=[])
+    parser.add_argument("--blacklist", metavar="MIME_TYPE", action="append", help="Don't attempt to extract files that match %(metavar)s (unused when combined with --no-extract).", default=[])
     parser.add_argument("--fuzzy-threshold", help="Threshold for fuzzy-matching to detect moved files (<= 0 to disable, default is 80)", type=int, default=None)
     parser.add_argument("--max_depth", help="Maximum depth for recursive unpacking (< 0 for no limit, default is 8)", type=int, default=None)
     parser.add_argument("--no-extract", action="store_false", dest="extract", help="Consider all files are already extracted, and only compare them", default=None)
