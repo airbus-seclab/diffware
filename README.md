@@ -182,13 +182,13 @@ Disabling this option has the side effect of making the comparison tool follow s
 You should also try to exclude as many files as possible, either based on their mime-type:
 
 ```
---exclude-mime audio/* --exclude-mime image/* --exclude-mime video/*
+--exclude-mime "audio/*" --exclude-mime "image/*" --exclude-mime "video/*"
 ```
 
 ... or based on their path:
 
 ```
---exclude */build/* --exclude *.txt --exclude *.json
+--exclude "*/build/*" --exclude "*.txt" --exclude "*.json"
 ```
 
 You can also tweak the `blacklist` option from the config file to prevent unpacking attempts of known mime-types for which it's unnecessary.
@@ -234,21 +234,21 @@ Found 12 added files, 28 removed files and 239 changed files (279 files in total
 Much better! When looking at the output, we notice quite a few images, which we'd like to exclude. We can run the script again:
 
 ```bash
-$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime image/*
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime "image/*"
 Found 12 added files, 9 removed files and 232 changed files (253 files in total)
 ```
 
 Once again, better. There are some changes related to package versions, we can also decide to exclude them:
 
 ```bash
-$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime image/* --exclude *.control
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime "image/*" --exclude "*.control"
 Found 12 added files, 9 removed files and 125 changed files (146 files in total)
 ```
 
 Now that we're happy with the output, we can save it to a file and run [diffoscope](https://diffoscope.org/) to dive into the changes:
 
 ```bash
-$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime image/* --exclude *.control --output ~/openwrt-19.07.2_vs_19.07.3.diff
+$ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime "image/*" --exclude "*.control" --output ~/openwrt-19.07.2_vs_19.07.3.diff
 $ ./tools/diffoscope.py ~/openwrt-19.07.2_vs_19.07.3.diff --html-dir ~/openwrt-diff --exclude-command "^stat .*"
 ```
 
