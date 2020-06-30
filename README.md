@@ -1,6 +1,6 @@
 # Difftool
 
-The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and it can be combined with tools like [diffoscope](https://diffoscope.org).
+The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and be combined with tools like [diffoscope](https://diffoscope.org) to dive into those differences.
 
 ## Table of content
 
@@ -23,7 +23,7 @@ The minimal install doesn't allow for automatic file extraction, but can work on
 pip3 install argcomplete
 ```
 
-`fact_helper_file` provides filemagick and config parsing helpers:
+`fact_helper_file` provides [filemagick](https://pypi.org/project/python-magic/) with custom signatures and config parsing helpers:
 
 ```bash
 git clone https://github.com/fkie-cad/fact_helper_file.git
@@ -43,7 +43,6 @@ All that is left is to clone this repository:
 git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
 cd ~/difftool
 ```
-
 
 ### Full
 
@@ -211,7 +210,7 @@ Any option other than the path to the file will be passed to `diffoscope`. When 
 
 ## Example
 
-Here's an example of using the tool to find the differences between two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful example of how this tool can be used.
+Let's say we want to find out what changes have been made between two firmware versions, to know if some features have been added or some vulnerabilities have been patched. In this example, we'll work with two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful illustration of how this tool can be used.
 
 Here's the result of comparing the `rootfs-squashfs.img.gz` of versions [19.07.2](https://downloads.openwrt.org/releases/19.07.2/targets/x86/64/) and [19.07.3](https://downloads.openwrt.org/releases/19.07.3/targets/x86/64/) for the x86-64 architecture:
 
@@ -254,4 +253,8 @@ $ ./tools/diffoscope.py ~/openwrt-19.07.2_vs_19.07.3.diff --html-dir ~/openwrt-d
 
 **Note:** The `--exclude-command` option of diffoscope is not mandatory, but it makes the output less noisy. `--diff-mask` can also prove quite useful to ignore versions strings or dates for example.
 
-These options can then be saved to a configuration file and later reused for other versions of OpenWRT so this work doesn't have to be done each time.
+
+In the end, we have obtained:
+* A list of files containing only the differences that matter to our use-case,
+* A quicker look at their content by running diffoscope on this script's output,
+* A set of options that can be turned into a config file and later reused for other versions of OpenWRT so this work doesn't have to be done each time.
