@@ -48,6 +48,14 @@ class FilesetComparator:
             missing_count,
         ))
 
+        if missing_count > 100 and new_count > 100:
+            # If there are many missing and new files, looking for moved files
+            # will take a long time. Perhaps there's a folder name issue?
+            Logger.warn("Found {} files with different paths (and {} with similar paths), looking for moved files may take a while. Did a folder name change?".format(
+                missing_count + new_count,
+                common_count
+            ))
+
         moved_count = len(self.moved_file_pairs)
         Logger.debug("Found {} files in common, {} moved files, {} new files and {} missing files\n".format(
             common_count,
@@ -158,9 +166,6 @@ class FilesetComparator:
         """
         Logger.progress("Looking for moved {}...".format(file.path))
 
-        if file.fuzzy_hash is None:
-            return None
-
         if file_set is None:
             file_set = list(self._new_files)
 
@@ -171,9 +176,6 @@ class FilesetComparator:
 
         comparisons = []
         for f in file_set:
-            if not f.fuzzy_hash:
-                continue
-
             score = type(self).compute_distance(file, f)
             comparisons.append((score, f))
 
