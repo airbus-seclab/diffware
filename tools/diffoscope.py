@@ -24,16 +24,24 @@ def _hardlink_file(file, dir, prefix=""):
     dst = _get_file_output_path(file, dir, prefix)
 
     # Copy the file to the matching place in the tmp dir so hierachy is kept
-    os.makedirs(dst.parent, exist_ok=True)
-    os.link(file, dst)
+    try:
+        os.makedirs(dst.parent, exist_ok=True)
+        os.link(file, dst)
+    except FileExistsError:
+        # This file was already copied, don't do it again
+        pass
 
 
 def _copy_file(file, dir, prefix=""):
     dst = _get_file_output_path(file, dir, prefix)
 
     # Copy the file to the matching place in the tmp dir so hierachy is kept
-    os.makedirs(dst.parent, exist_ok=True)
-    shutil.copy(file, dst)
+    try:
+        os.makedirs(dst.parent, exist_ok=True)
+        shutil.copy(file, dst)
+    except shutil.SameFileError:
+        # This file was already copied, don't do it again
+        pass
 
 
 def _get_path(line):
