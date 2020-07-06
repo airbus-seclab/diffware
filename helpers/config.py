@@ -57,16 +57,23 @@ class Config(ConfigParser):
         }
     }
 
-    def __init__(self, arguments):
+    def __init__(self, arguments=None):
         super().__init__(self)
-        self.read(arguments.config_file)
+
+        if arguments:
+            config_file = arguments.config_file
+        else:
+            config_file = default_config_path()
+
+        self.read(config_file)
         self._merge(arguments)
 
     def _merge(self, arguments):
         """
         Merge options passed through arguments and in config file
         """
-        args = vars(arguments)
+        args = vars(arguments) if arguments else {}
+
         for section, values in self.__sections.items():
             for key in values.keys():
                 arg_value = args.get(key, None)
