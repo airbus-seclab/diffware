@@ -161,13 +161,7 @@ class FilesetComparator:
 
     @classmethod
     def _files_classes_match(self, file1, file2):
-        # Generic files can be matched with anything
-        if file1.__class__ == files.generic.UnpackedFile:
-            return True
-        if file2.__class__ == files.generic.UnpackedFile:
-            return True
-
-        # Otherwise, classes should be the same
+        # Classes should be the same
         return file1.__class__ == file2.__class__
 
     def _match_file(self, file, file_set=None):
