@@ -50,13 +50,13 @@ class FileComparator:
         ) == 0
 
     @classmethod
-    def tmp_file_path(self):
+    def tmp_file_path(cls):
         """
         Used to create a temporary file that should be cleaned up after the
         script is done (remember to call cleanup)
         """
-        return tempfile.mktemp(dir=self.TMP_DIR.name)
+        return tempfile.mktemp(dir=cls.TMP_DIR.name)
 
     @classmethod
-    def cleanup(self):
-        self.TMP_DIR.cleanup()
+    def cleanup(cls):
+        cls.TMP_DIR.cleanup()

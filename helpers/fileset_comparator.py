@@ -160,7 +160,7 @@ class FilesetComparator:
         return self._specialize(self.file_set2 - self._common_files)
 
     @classmethod
-    def _files_classes_match(self, file1, file2):
+    def _files_classes_match(cls, file1, file2):
         # Classes should be the same
         return file1.__class__ == file2.__class__
 

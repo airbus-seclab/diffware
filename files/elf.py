@@ -38,7 +38,7 @@ class ElfAnalyzer(Analyzer):
 
 class ElfSectionCommand(Command):
     @classmethod
-    def make_regex(self, path):
+    def make_regex(cls, path):
         path_dir = re.escape(os.path.dirname(path).encode("utf-8"))
         path = re.escape(path.encode("utf-8"))
         regex_list = []
@@ -56,16 +56,16 @@ class ElfSectionCommand(Command):
         return regex_list
 
     @classmethod
-    def cmd_options(self):
+    def cmd_options(cls):
         return ["--decompress"]
 
     @classmethod
-    def make_cmd(self, file, config, sections):
+    def make_cmd(cls, file, config, sections):
         # Don't run a command if there are no sections
         if not sections:
             return
 
-        cmd = self.cmd_options()
+        cmd = cls.cmd_options()
 
         # Join all section names together to dump all at once
         for section in sections:
@@ -75,13 +75,13 @@ class ElfSectionCommand(Command):
 
     @classmethod
     @Profiler.profilable
-    def run(self, *args, **kwargs):
+    def run(cls, *args, **kwargs):
         return super().run(*args, **kwargs)
 
 
 class ElfCodeSectionCommand(Command):
     @classmethod
-    def make_regex(self, path):
+    def make_regex(cls, path):
         regex_list = []
 
         # Match the full path to the file
@@ -103,16 +103,16 @@ class ElfCodeSectionCommand(Command):
         return regex_list
 
     @classmethod
-    def cmd_options(self):
+    def cmd_options(cls):
         return ["--disassemble", "--demangle", "--reloc", "--no-show-raw-insn"]
 
     @classmethod
-    def make_cmd(self, file, config, sections):
+    def make_cmd(cls, file, config, sections):
         # Don't run a command if there are no sections
         if not sections:
             return
 
-        cmd = self.cmd_options()
+        cmd = cls.cmd_options()
 
         # Join all section names together to dump all at once
         for section in sections:
@@ -123,7 +123,7 @@ class ElfCodeSectionCommand(Command):
 
     @classmethod
     @Profiler.profilable
-    def run(self, *args, **kwargs):
+    def run(cls, *args, **kwargs):
         return super().run(*args, **kwargs)
 
 

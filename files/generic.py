@@ -51,11 +51,11 @@ class UnpackedFile:
 
     @classmethod
     @Profiler.profilable
-    def recognizes(self, file_type: dict):
+    def recognizes(cls, file_type: dict):
         """
         Whether this class can be used to analyze files with the given type
         """
-        return self.recognize_regex.match(file_type["full"])
+        return cls.recognize_regex.match(file_type["full"])
 
     def has_same_content_as(self, other):
         """
