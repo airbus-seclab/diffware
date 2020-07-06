@@ -38,17 +38,18 @@ def _copy_if_necessary(file_path, source_folder, destination_folder):
         target_path = pathlib.Path(destination_folder, relative_path)
         os.makedirs(target_path.parent, exist_ok=True)
 
-        try:
-            return shutil.copy(file_path, target_path, follow_symlinks=False)
-        except FileExistsError:
-            # This may be raised when shutil calls os.symlink
-            return target_path
+        return shutil.copy(file_path, target_path, follow_symlinks=False)
     except ValueError:
         # relative_to will fail for files which are not located in the
         # source_folder (so they must be in the destination_folder)
         return file_path
     except shutil.SameFileError:
         # Copy may fail if the file is already in the right location
+        return file_path
+    except FileExistsError as e:
+        # When handling symlinks, attempting to override an existing link
+        # with another will fail
+        Logger.warn(e)
         return file_path
 
 
