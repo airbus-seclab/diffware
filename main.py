@@ -19,19 +19,26 @@ from helpers.fileset_comparator import FilesetComparator
 
 
 def output_change(edit, config):
+    global lock
     path1, path2, distance = edit
+
+    lock.acquire()
 
     if config.compute_distance:
         Logger.output("\nFile1: {}\nFile2: {}\nDistance: {}".format(
             path1,
             path2,
-            distance
+            distance,
+            flush=True
         ))
     else:
         Logger.output("\nFile1: {}\nFile2: {}".format(
             path1,
-            path2
+            path2,
+            flush=True
         ))
+
+    lock.release()
 
 
 def _compare(config, delay_output, pair):
@@ -63,6 +70,11 @@ def _compare(config, delay_output, pair):
     return edit
 
 
+def _init_process(shared_lock):
+    global lock
+    lock = shared_lock
+
+
 def compare_files(file_set1, file_set2, config):
     comparator = FilesetComparator(files1, files2, config)
     pairs = comparator.get_files_to_compare()
@@ -74,12 +86,14 @@ def compare_files(file_set1, file_set2, config):
     elif config.sort_order.lower() == "path":
         delay_output = True
 
-
     # Build a partial func by passing config and delay output, so the result
     # can be used by pool.map
     func = partial(_compare, config, delay_output)
 
-    with multiprocessing.Pool(config.jobs) as pool:
+    # Use lock so lines aren't mixed up in output
+    lock = multiprocessing.Lock()
+
+    with multiprocessing.Pool(config.jobs, initializer=_init_process, initargs=(lock,)) as pool:
         edits = pool.map(func, pairs)
         edits = [edit for edit in edits if edit is not None]
 
