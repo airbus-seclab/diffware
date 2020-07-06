@@ -12,8 +12,9 @@ import pathlib
 import fnmatch
 import operator
 import itertools
+import multiprocessing
 from copy import deepcopy
-from functools import lru_cache
+from functools import lru_cache, partial
 
 try:
     # Try to import fact_extractor if possible, otherwise
@@ -250,6 +251,31 @@ def output_change(edit, config):
         ))
 
 
+def _compare(config, delay_output, pair):
+    file1, file2 = pair
+    Logger.progress("Comparing {} and {}...".format(file1.relative_path, file2.relative_path))
+
+    if FileComparator.are_equal(file1, file2):
+        return
+
+    if config.compute_distance:
+        distance = FilesetComparator.compute_distance(file1, file2)
+    else:
+        distance = None
+
+    if distance is not None and distance < config.min_dist:
+        # Ignore files that are too similar
+        return
+
+    edit = (file1.path, file2.path, distance)
+
+    # Start printing files if we can, so user doesn't have to wait too long
+    if not delay_output:
+        output_change(edit, config)
+
+    return edit
+
+
 def compare_files(file_set1, file_set2, config):
     comparator = FilesetComparator(files1, files2, config)
     pairs = comparator.get_files_to_compare()
@@ -261,28 +287,14 @@ def compare_files(file_set1, file_set2, config):
     elif config.sort_order.lower() == "path":
         delay_output = True
 
-    # Print info about the files that were modified
-    edits = []
-    for file1, file2 in pairs:
-        Logger.progress("Comparing {} and {}...".format(file1.relative_path, file2.relative_path))
 
-        if FileComparator.are_equal(file1, file2):
-            continue
+    # Build a partial func by passing config and delay output, so the result
+    # can be used by pool.map
+    func = partial(_compare, config, delay_output)
 
-        if config.compute_distance:
-            distance = FilesetComparator.compute_distance(file1, file2)
-        else:
-            distance = None
-
-        if distance is not None and distance < config.min_dist:
-            # Ignore files that are too similar
-            continue
-
-        edits.append((file1.path, file2.path, distance))
-
-        # Start printing files if we can, so user doesn't have to wait too long
-        if not delay_output:
-            output_change(edits[-1], config)
+    with multiprocessing.Pool(config.jobs) as pool:
+        edits = pool.map(func, pairs)
+        edits = [edit for edit in edits if edit is not None]
 
     # If necessary, sort and then output the result
     Logger.progress("Generating output...")
