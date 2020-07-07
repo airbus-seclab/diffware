@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 
 try:
@@ -60,6 +61,13 @@ class Logger():
     def cleanup():
         if Logger.OUTPUT_FILE:
             Logger.OUTPUT_FILE.close()
+
+    @staticmethod
+    def flush_output():
+        if Logger.OUTPUT_FILE:
+            Logger.OUTPUT_FILE.flush()
+        else:
+            sys.stdout.flush()
 
     # Define custom logging methods so as not to conflict with FACT's logging
 

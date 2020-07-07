@@ -75,7 +75,18 @@ def _init_process(shared_lock):
     lock = shared_lock
 
 
-def compare_files(file_set1, file_set2, config):
+def compare_files(file_set1, file_set2, data_folder_1, data_folder_2, config):
+    # Print info about the compared files
+    Logger.output("Directory1: {}\nDirectory2: {}".format(
+        data_folder_1,
+        data_folder_2
+    ))
+
+    # Make sure this is flushed before multiprocessing starts, otherwise
+    # it may be written multiple times
+    # Passing "flush=True" is not enough if the output target is a file
+    Logger.flush_output()
+
     comparator = FilesetComparator(files1, files2, config)
     pairs = comparator.get_files_to_compare()
 
@@ -136,8 +147,8 @@ if __name__ == "__main__":
         file1 = config.FILE_PATH_1
         file2 = config.FILE_PATH_2
         runner = Runner(config)
-        files1, files2 = runner.get_extracted_files(file1, file2)
-        compare_files(files1, files2, config)
+        files1, files2, data_folder_1, data_folder_2 = runner.get_extracted_files(file1, file2)
+        compare_files(files1, files2, data_folder_1, data_folder_2, config)
         Profiler.print()
     finally:
         FileComparator.cleanup()

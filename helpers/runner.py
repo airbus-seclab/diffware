@@ -144,13 +144,7 @@ class Runner:
             data_folder_1 = file_path1 if file_path1.is_dir() else file_path1.parent
             data_folder_2 = file_path2 if file_path2.is_dir() else file_path2.parent
 
-        # Print info about the compared files
-        Logger.output("Directory1: {}\nDirectory2: {}".format(
-            data_folder_1,
-            data_folder_2
-        ))
-
-        return files1, files2
+        return files1, files2, data_folder_1, data_folder_2
 
     def extract(self, file_path, unpacker, config):
         """
