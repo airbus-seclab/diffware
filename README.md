@@ -48,10 +48,10 @@ cd ~/difftool
 
 The full install adds an automatic extraction tool.
 
-Install `fact_extractor` from [this branch](https://github.com/JRomainG/fact_extractor/tree/dev):
+Install [fact_extractor](https://github.com/fkie-cad/fact_extractor):
 
 ```bash
-git clone https://github.com/JRomainG/fact_extractor.git ~/fact_extractor
+git clone https://github.com/fkie-cad/fact_extractor.git ~/fact_extractor
 cd ~/fact_extractor
 fact_extractor/install/pre_install.sh
 fact_extractor/install.py

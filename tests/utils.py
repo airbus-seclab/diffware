@@ -5,7 +5,7 @@ from helpers.runner import Runner
 
 def get_files(config, path1, path2):
     runner = Runner(config)
-    files1, files2 = runner.get_extracted_files(path1, path2)
+    files1, files2, _, _ = runner.get_extracted_files(path1, path2)
     return list(files1), list(files2)
 
 

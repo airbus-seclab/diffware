@@ -128,9 +128,16 @@ class Runner:
         config2 = deepcopy(self.config)
         config2.update("data_folder", self.config.get("unpack", "data_folder_2"))
 
+        # Create output "report" folder or fact extractor will crash
+        report_path = os.path.join(config1.get("unpack", "data_folder"), "reports")
+        os.makedirs(report_path, exist_ok=True)
+
+        report_path = os.path.join(config2.get("unpack", "data_folder"), "reports")
+        os.makedirs(report_path, exist_ok=True)
+
         if self.config.extract:
-            unpacker1 = Unpacker(config=config1, exclude=self.excluded)
-            unpacker2 = Unpacker(config=config2, exclude=self.excluded)
+            unpacker1 = Unpacker(config=config1)
+            unpacker2 = Unpacker(config=config2)
 
             files1 = self.extract(file_path1, unpacker1, config1)
             files2 = self.extract(file_path2, unpacker2, config2)
@@ -233,7 +240,7 @@ class Runner:
         # Attempt to extract file, if necessary
         extracted_count = 0
         if not should_skip:
-            for path in unpacker.unpack(file_path, self.excluded):
+            for path in unpacker.unpack(file_path):
                 # unpack already does the walk for us, so we can just call _extract
                 # again
                 extracted_count += 1
