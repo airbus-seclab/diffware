@@ -20,24 +20,38 @@ from helpers.fileset_comparator import FilesetComparator
 
 def output_change(edit, config):
     global lock
-    path1, path2, distance = edit
+    file1, file2, distance = edit
+
+    path1, path2 = file1.path, file2.path
+    mime1, mime2 = file1.type, file2.type
+
+    if mime1 == mime2:
+        mime = "{} ({})".format(mime1["full"], mime1["mime"])
+    else:
+        mime = "{} ({}) / {} ({})".format(
+            mime1["full"],
+            mime1["mime"],
+            mime2["full"],
+            mime2["mime"]
+        )
 
     lock.acquire()
 
     if config.compute_distance:
-        Logger.output("\nFile1: {}\nFile2: {}\nDistance: {}".format(
+        Logger.output("\nFile1: {}\nFile2: {}\nMime: {}\nDistance: {}".format(
             path1,
             path2,
-            distance,
-            flush=True
+            mime,
+            distance
         ))
     else:
-        Logger.output("\nFile1: {}\nFile2: {}".format(
+        Logger.output("\nFile1: {}\nFile2: {}\nMime: {}".format(
             path1,
             path2,
-            flush=True
+            mime
         ))
 
+    Logger.flush_output()
     lock.release()
 
 
@@ -61,7 +75,7 @@ def _compare(config, delay_output, pair):
         # Ignore files that are too similar
         return
 
-    edit = (file1.path, file2.path, distance)
+    edit = (file1, file2, distance)
 
     # Start printing files if we can, so user doesn't have to wait too long
     if not delay_output:
@@ -123,15 +137,23 @@ def compare_files(file_set1, file_set2, data_folder_1, data_folder_2, config):
     added_count = 0
     for added in comparator.added_files:
         added_count += 1
-        Logger.output("\nAdded: {}".format(added.path))
+        mime = "{} ({})".format(added.type["full"], added.type["mime"])
+        Logger.output("\nAdded: {}\nMime: {}".format(
+            added.path,
+            mime
+        ))
 
     removed_count = 0
     for removed in comparator.removed_files:
         removed_count += 1
-        Logger.output("\nRemoved: {}".format(removed.path))
+        mime = "{} ({})".format(removed.type["full"], removed.type["mime"])
+        Logger.output("\nRemoved: {}\nMime: {}".format(
+            removed.path,
+            mime
+        ))
 
     # Print overall statistics
-    Logger.info("Found {} added files, {} removed files and {} changed files ({} files in total)".format(
+    Logger.info("\nFound {} added files, {} removed files and {} changed files ({} files in total)".format(
         added_count,
         removed_count,
         len(edits),

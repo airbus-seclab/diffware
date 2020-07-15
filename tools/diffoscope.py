@@ -51,19 +51,15 @@ def _get_path(line):
 
 
 def _get_pair(lines):
-    if len(lines) > 1:
-        # A file was modified
-        file1 = _get_path(lines[0])
+    line = lines[0]
+    file1 = _get_path(line)
+    if line.startswith("Added:"):
+        return (None, file1)
+    elif line.startswith("Removed:"):
+        return (file1, None)
+    else:
         file2 = _get_path(lines[1])
         return (file1, file2)
-
-    # A file was added or removed
-    line = lines[0]
-    file = _get_path(line)
-    if line.startswith("Added"):
-        return (None, file)
-    else:
-        return (file, None)
 
 
 def _parse_diff(diff):
