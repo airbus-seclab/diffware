@@ -13,14 +13,16 @@ The goal of this tool is to provide a summary of the changes between two files o
 
 ## Installing
 
+Python 3.8 or newer is recommended.
+
 ### Minimal
 
 The minimal install doesn't allow for automatic file extraction, but can work on already extracted files and directories.
 
-`argcomplete` is used to provide autocompletion, if possible:
+Install requirements available through pip:
 
 ```bash
-pip3 install argcomplete
+pip3 install -r requirements.txt
 ```
 
 `fact_helper_file` provides [filemagick](https://pypi.org/project/python-magic/) with custom signatures and config parsing helpers:
@@ -29,12 +31,6 @@ pip3 install argcomplete
 git clone https://github.com/fkie-cad/fact_helper_file.git
 cd fact_helper_file
 pip3 install .
-```
-
-`tlsh` enables to compute distances between files and identify moved files:
-
-```bash
-pip3 install tlsh
 ```
 
 All that is left is to clone this repository:
@@ -57,10 +53,10 @@ fact_extractor/install/pre_install.sh
 fact_extractor/install.py
 ```
 
-Make sure the `tlsh` and `argcomplete` are installed:
+Make sure the pip requirements are installed:
 
 ```bash
-pip3 install tlsh argcomplete
+pip3 install -r requirements.txt
 ```
 
 Finally, clone this repository:
