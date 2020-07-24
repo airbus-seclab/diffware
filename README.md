@@ -204,7 +204,9 @@ The output of this script can be parsed to run [diffoscope](https://diffoscope.o
 
 Any option other than the path to the file will be passed to `diffoscope`. When possible, the modified files won't be copied, but a hardlink will be created in a temporary folder.
 
-## Example
+## Examples
+
+### OpenWRT
 
 Let's say we want to find out what changes have been made between two firmware versions, to know if some features have been added or some vulnerabilities have been patched. In this example, we'll work with two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful illustration of how this tool can be used.
 
@@ -254,3 +256,7 @@ In the end, we have obtained:
 * A list of files containing only the differences that matter to our use-case,
 * A quicker look at their content by running diffoscope on this script's output,
 * A set of options that can be turned into a config file and later reused for other versions of OpenWRT so this work doesn't have to be done each time.
+
+### FRRouting
+
+A use case example can be found in [the doc folder](doc/blogpost.md). It shows how to use both this tool and [diffoscope](https://diffoscope.org) to identify a vulnerability fix in an upgrade.
