@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 #
+# Modified version of the file included in the diffoscope project
+# (https://diffoscope.org). A copy of the license is included below:
+#
 # diffoscope: in-depth comparison of files, archives, and directories
 #
 # Copyright © 2014-2015 Jérémy Bobbio <lunar@debian.org>
 # Copyright © 2015-2020 Chris Lamb <lamby@debian.org>
+# Copyright © 2020 Jean-Romain Garnier <github@jean-romain.com>
 #
 # diffoscope is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
