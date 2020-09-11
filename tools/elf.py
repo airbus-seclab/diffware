@@ -7,7 +7,7 @@
 #
 # Copyright © 2014-2015 Jérémy Bobbio <lunar@debian.org>
 # Copyright © 2015-2020 Chris Lamb <lamby@debian.org>
-# Copyright © 2020 Jean-Romain Garnier <github@jean-romain.com>
+# Copyright © 2020 Jean-Romain Garnier <salsa@jean-romain.com>
 #
 # diffoscope is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ from diffoscope.tempfiles import get_named_temporary_file
 from diffoscope.difference import Difference
 
 from .deb import DebFile, get_build_id_map
+from .decompile import DecompilableContainer
 from .utils.file import File
 from .utils.command import Command, our_check_output
-from .utils.decompile import DecompilableContainer
-
+from .utils.container import Container
 
 DEBUG_SECTION_GROUPS = (
     "rawline",
@@ -120,7 +120,7 @@ class Readelf(Command):
         return self._filter_re.sub(b"", line)
 
     @property
-    def stdout(self):
+    def output(self):
         return self._process.stdout.splitlines(True)
 
 
@@ -404,7 +404,7 @@ class ObjdumpDisassembleSection(ObjdumpSection):
     )
 
     def objdump_options(self):
-        # With "--line-numbers" we get the source filename and line within the
+        # With '--line-numbers' we get the source filename and line within the
         # disassembled instructions.
         # objdump can get the debugging information from the elf or from the
         # stripped symbols file specified in the .gnu_debuglink section
@@ -441,7 +441,7 @@ READELF_COMMANDS = (
 
 def _compare_elf_data(path1, path2):
     return [
-        Difference.from_command(x, path1, path2, ignore_returncodes={1})
+        Difference.from_operation(x, path1, path2, ignore_returncodes={1})
         for x in list(READELF_COMMANDS)
     ]
 
@@ -541,8 +541,8 @@ class ElfSection(File):
         return False
 
     def compare(self, other, source=None):
-        return Difference.from_command(
-            ReadElfSection, self.path, other.path, command_args=[self._name]
+        return Difference.from_operation(
+            ReadElfSection, self.path, other.path, operation_args=[self._name]
         )
 
 
@@ -554,11 +554,11 @@ class ElfCodeSection(ElfSection):
         diff = None
         error = None
         try:
-            diff, excluded = Difference.from_command_exc(
+            diff, excluded = Difference.from_operation_exc(
                 ObjdumpDisassembleSection,
                 self.path,
                 other.path,
-                command_args=[self._name],
+                operation_args=[self._name],
             )
         except subprocess.CalledProcessError as e:
             # eg. When failing to disassemble a different architecture.
@@ -569,11 +569,11 @@ class ElfCodeSection(ElfSection):
             return diff
 
         try:
-            diff, excluded = Difference.from_command_exc(
+            diff, excluded = Difference.from_operation_exc(
                 ObjdumpDisassembleSectionNoLineNumbers,
                 self.path,
                 other.path,
-                command_args=[self._name],
+                operation_args=[self._name],
             )
         except subprocess.CalledProcessError as e:
             error = e
@@ -587,11 +587,11 @@ class ElfCodeSection(ElfSection):
 
 class ElfStringSection(ElfSection):
     def compare(self, other, source=None):
-        return Difference.from_command(
+        return Difference.from_operation(
             ReadelfStringSection,
             self.path,
             other.path,
-            command_args=[self._name],
+            operation_args=[self._name],
         )
 
 
@@ -685,7 +685,7 @@ class ElfContainer(DecompilableContainer):
                 if _should_skip_section(name, type):
                     continue
 
-                # Use first match, with last option being _ as fallback
+                # Use first match, with last option being '_' as fallback
                 elf_class = [
                     ElfContainer.SECTION_FLAG_MAPPING[x]
                     for x in flags
@@ -864,7 +864,7 @@ class Strings(Command):
         return ("strings", "--all", "-n", "10", self.path)
 
     @property
-    def stdout(self):
+    def output(self):
         lines = self._process.stdout.splitlines(True)
 
         # Filter lines before sorting them because the mask
@@ -908,6 +908,6 @@ class ElfFile(File):
             return differences
 
         differences.append(
-            Difference.from_command(Strings, self.path, other.path)
+            Difference.from_operation(Strings, self.path, other.path)
         )
         return differences
