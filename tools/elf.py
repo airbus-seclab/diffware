@@ -349,6 +349,13 @@ class ReadelfStringSection(ReadElfSection):
             "--string-dump={}".format(self.section_name)
         ]
 
+    def init_regex(self):
+        self._filter_re = re.compile(rb"^\s*\[\s*[0-9a-f]+\]\s*")
+
+    def filter_stdout(self, line):
+        # Remove string offsets (no need to call super)
+        return self._filter_re.sub(b"", line)
+
 
 class ObjdumpSection(Command):
     def __init__(self, path, section_name, *args, **kwargs):
