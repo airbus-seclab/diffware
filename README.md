@@ -1,4 +1,4 @@
-# Difftool
+# Diffware
 
 The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and be combined with tools like [diffoscope](https://diffoscope.org) to dive into those differences.
 
@@ -36,8 +36,8 @@ pip3 install .
 All that is left is to clone this repository:
 
 ```bash
-git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
-cd ~/difftool
+git clone https://github.com/airbus-seclab/diffware.git ~/diffware
+cd ~/diffware
 ```
 
 ### Full
@@ -62,8 +62,8 @@ pip3 install -r requirements.txt
 Finally, clone this repository:
 
 ```bash
-git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
-cd ~/difftool
+git clone https://github.com/airbus-seclab/Diffware.git ~/diffware
+cd ~/diffware
 ```
 
 ## Usage

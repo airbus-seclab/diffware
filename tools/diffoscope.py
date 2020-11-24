@@ -102,8 +102,8 @@ def parse_file(file_path):
 
 
 def create_tmp_dirs():
-    tmp1 = tempfile.TemporaryDirectory(prefix="difftool_")
-    tmp2 = tempfile.TemporaryDirectory(prefix="difftool_")
+    tmp1 = tempfile.TemporaryDirectory(prefix="diffware_")
+    tmp2 = tempfile.TemporaryDirectory(prefix="diffware_")
     return tmp1, tmp2
 
 
@@ -150,9 +150,9 @@ def call_diffoscope(dir1, dir2, args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wrapper to run diffoscope on the output of difftool")
-    parser.add_argument("difftool_args", nargs="*")
-    parser.add_argument("FILE_PATH", type=str, help="Path to file created by running difftool")
+    parser = argparse.ArgumentParser(description="Wrapper to run diffoscope on the output of diffware")
+    parser.add_argument("diffware_args", nargs="*")
+    parser.add_argument("FILE_PATH", type=str, help="Path to file created by running diffware")
 
     # We only parse the second argument (the first being the name of the script)
     # since the other will be used for diffoscope

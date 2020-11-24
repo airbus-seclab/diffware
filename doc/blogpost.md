@@ -22,7 +22,7 @@ As [CVE-2019-5892](https://frrouting.org/community/security/cve-2019-5892.html) 
 
 ### Tools
 
-For this example, [Difftool](https://github.com/airbus-seclab/Difftool) and [diffoscope](https://diffoscope.org) will be used. The installation procedure can be found on each project's page. For Difftool, a minimal install is enough.
+For this example, [diffware](https://github.com/airbus-seclab/diffware) and [diffoscope](https://diffoscope.org) will be used. The installation procedure can be found on each project's page. For diffware, a minimal install is enough.
 
 ## Unpacking
 
@@ -93,7 +93,7 @@ $ ./tools/diffoscope.py frr.diff --html-dir /tmp/diffoscope --exclude-command "s
   * Ignore version numbers (`version [0-9\.]+`),
   * Ignore offset changes in `objdump` instructions (`\-?0x[0-9a-f]+`)
   * Ignore explicit addresses when they have been resolved (`[0-9a-f]+(?=\s+<)`)
-* These options are quite rough and not ideal, though they should work in this example. For a better implementation, you should checkout [this repository](https://github.com/airbus-seclab/Difftool/tree/master/tools) which contains patches to diffoscope aimed at reducing noise.
+* These options are quite rough and not ideal, though they should work in this example. For a better implementation, you should checkout [this repository](https://github.com/airbus-seclab/diffware/tree/master/tools) which contains patches to diffoscope aimed at reducing noise.
 
 This should significantly reduce the size of the output (and the time needed to process the files). We can then very quickly identify which files have significant changes.
 

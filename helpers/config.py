@@ -144,7 +144,7 @@ class Config(ConfigParser):
 
 
 def make_config():
-    arguments = setup_argparser("difftool", "Shallow firmware diffing tool", sys.argv)
+    arguments = setup_argparser("Diffware", "Shallow firmware diffing tool", sys.argv)
     config = Config(arguments)
     Logger.setup_logging(debug=config.debug, progress=config.show_progress, log_level=config.log_level, output_file=config.data_file)
 

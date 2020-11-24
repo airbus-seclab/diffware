@@ -27,7 +27,7 @@ class FileComparator:
     Class comparing two given files, and handling temporary file paths generated
     for this comparison
     """
-    TMP_DIR = tempfile.TemporaryDirectory(prefix="difftool_")
+    TMP_DIR = tempfile.TemporaryDirectory(prefix="diffware_")
 
     @staticmethod
     def are_equal(file1, file2):
