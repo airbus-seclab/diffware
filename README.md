@@ -9,7 +9,7 @@ The goal of this tool is to provide a summary of the changes between two files o
 3. [Configuration](#configuration)
 4. [Optimizing](#optimizing)
 5. [Tools](#tools)
-6. [Example](#example)
+6. [Examples](#examples)
 
 ## Installing
 
