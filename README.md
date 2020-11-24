@@ -206,6 +206,13 @@ Any option other than the path to the file will be passed to `diffoscope`. When 
 
 ## Examples
 
+### Example output
+
+<p float="left">
+  <img alt="Diffware CLI example" src="doc/diffware_screenshot.png" width="49%"/>
+  <img alt="Diffoscope example" src="doc/diffware_diffoscope_screenshot.png" width="49%"/>
+</p>
+
 ### OpenWRT
 
 Let's say we want to find out what changes have been made between two firmware versions, to know if some features have been added or some vulnerabilities have been patched. In this example, we'll work with two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful illustration of how this tool can be used.
