@@ -2,10 +2,10 @@
 
 The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and be combined with tools like [diffoscope](https://diffoscope.org) to dive into those differences.
 
-<p float="left">
+<p float="left" align="center">
   <img alt="Diffware CLI example" src="doc/diffware_screenshot.png" width="49%"/>
   <img alt="Diffoscope example" src="doc/diffware_diffoscope_screenshot.png" width="49%"/>
-  <p style="text-align: center">Example usage of diffware combined with diffoscope</p>
+  Example usage of diffware combined with diffoscope
 </p>
 
 ## Table of content
