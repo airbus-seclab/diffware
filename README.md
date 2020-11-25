@@ -8,6 +8,9 @@ The goal of this tool is to provide a summary of the changes between two files o
   Example usage of diffware combined with diffoscope
 </p>
 
+<br/>
+Checkout [this file](doc/blogpost.md) for a use-case example and an overview of the tool's capabilities.
+
 ## Table of content
 
 1. [Installing](#installing)
