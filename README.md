@@ -2,6 +2,12 @@
 
 The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and be combined with tools like [diffoscope](https://diffoscope.org) to dive into those differences.
 
+<p float="left">
+  <img alt="Diffware CLI example" src="doc/diffware_screenshot.png" width="49%"/>
+  <img alt="Diffoscope example" src="doc/diffware_diffoscope_screenshot.png" width="49%"/>
+  <p style="text-align: center">Example usage of diffware combined with diffoscope</p>
+</p>
+
 ## Table of content
 
 1. [Installing](#installing)
@@ -205,13 +211,6 @@ The output of this script can be parsed to run [diffoscope](https://diffoscope.o
 Any option other than the path to the file will be passed to `diffoscope`. When possible, the modified files won't be copied, but a hardlink will be created in a temporary folder.
 
 ## Examples
-
-### Example output
-
-<p float="left">
-  <img alt="Diffware CLI example" src="doc/diffware_screenshot.png" width="49%"/>
-  <img alt="Diffoscope example" src="doc/diffware_diffoscope_screenshot.png" width="49%"/>
-</p>
 
 ### OpenWRT
 
