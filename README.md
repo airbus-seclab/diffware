@@ -9,6 +9,7 @@ The goal of this tool is to provide a summary of the changes between two files o
 </p>
 
 <br/>
+
 Checkout [this file](doc/blogpost.md) for a use-case example and an overview of the tool's capabilities.
 
 ## Table of content
