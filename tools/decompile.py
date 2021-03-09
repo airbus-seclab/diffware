@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Modified version of the file included in the diffoscope project
 # (https://diffoscope.org). A copy of the license is included below:
@@ -6,6 +5,7 @@
 # diffoscope: in-depth comparison of files, archives, and directories
 #
 # Copyright © 2020 Jean-Romain Garnier <salsa@jean-romain.com>
+# Copyright © 2020 Chris Lamb <lamby@debian.org>
 #
 # diffoscope is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -113,7 +113,9 @@ class DecompileGhidra(Decompile):
     # Remove unaff register offsets
     # unaff_EBX + 0xfff
     # (**(code **)(unaff_r30 + -0xfff))();
-    UNAFF_OFFSET_RE = re.compile(rb"(unaff_[A-Za-z0-9]+ [\+\-]\s*)\-?(0x)?[0-9a-f]+")
+    UNAFF_OFFSET_RE = re.compile(
+        rb"(unaff_[A-Za-z0-9]+ [\+\-]\s*)\-?(0x)?[0-9a-f]+"
+    )
 
     # Remove unaff register name
     UNAFF_RE = re.compile(rb"unaff_[A-Za-z0-9]+")
@@ -364,7 +366,9 @@ class DecompilableContainer(Container):
 
         # Skip disassembly (and decompilation) if a dependency is missing
         # or if radare2 commands are excluded
-        if r2pipe is None or all_decompile_operations_are_excluded(self.source):
+        if r2pipe is None or all_decompile_operations_are_excluded(
+            self.source
+        ):
             return
 
         # Use "-2" flag to silence radare2 warnings
@@ -378,7 +382,9 @@ class DecompilableContainer(Container):
         self.r2.cmd("e asm.offset = false")
 
         # In hex dump of function, hide everything but the hex values
-        self.r2.cmd("e hex.offset = false;e hex.header = false;e hex.ascii = false")
+        self.r2.cmd(
+            "e hex.offset = false;e hex.header = false;e hex.ascii = false"
+        )
 
         # Use radare2 to get the list of functions
         # If there aren't any, cmdj returns None

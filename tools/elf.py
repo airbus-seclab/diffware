@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Modified version of the file included in the diffoscope project
 # (https://diffoscope.org). A copy of the license is included below:
@@ -383,6 +382,11 @@ class ObjdumpSection(Command):
         if line.startswith(b"In archive"):
             return b""
 
+        # objdump (from approximately 2.35.50.20201125-1 onwards) returns "ret"
+        # instead of "retq"; lets normalise them to "retq" for now.
+        if line == b"\tret    \n":
+            return b"\tretq   \n"
+
         return self.filter_stdout(line)
 
     def init_regex(self):
@@ -394,15 +398,19 @@ class ObjdumpSection(Command):
         self._resolved_re = re.compile(rb"\b([0-9a-f]+)(?=\s+\<.+\>)")
         # Then, parse lines that look like:
         # "lea  0x111cb4 (%rip),%rsi     # 12a012 <_fini+0xc4>"
-        self._pointer_re = re.compile(rb"\b(0x[0-9a-f]+)\b(?=.*\<.+\>)")
-        # Remove all hex values
+        # self._pointer_re = re.compile(rb"\b(0x[0-9a-f]+)\b(?=.*\<.+\>)")
+        # Remove all hex values (broader than previous regex, so replacing it)
         self._filter_re = re.compile(rb"\b0x[0-9a-f]+\b")
+        # Remonve numerical constants in standard operations like:
+        # "addi    r30,r30,-28620"
+        self._constants_re = re.compile(rb",-?[0-9]+")
 
     def filter_stdout(self, line):
         line = self._line_re.sub(b"", line)
         line = self._resolved_re.sub(b"XXX", line)
         # return self._pointer_re.sub(b"0xXXX ", line)
-        return self._filter_re.sub(b"0xX", line)
+        line = self._filter_re.sub(b"0xX", line)
+        return self._constants_re.sub(b",X", line)
 
 
 class ObjdumpDisassembleSection(ObjdumpSection):
@@ -465,10 +473,14 @@ IGNORE_SECTIONS = [
     ".eh_frame",
     ".eh_frame_hdr",
     ".dynstr",
+    ".dynbss",
     ".gnu.version",
     ".gnu.version_d",
     ".gnu.version_r",
     ".gnu_debuglink",
+    ".gnu.liblist",
+    ".gnu.conflict",
+    ".gnu.prelink_undo",
     ".note.gnu.build-id",
     ".data",
     ".rodata",
@@ -774,8 +786,10 @@ class ElfContainer(DecompilableContainer):
         debug_file_path = "./usr/lib/debug/.build-id/{0}/{1}.debug".format(
             build_id[:2], build_id[2:]
         )
-        debug_file = dbgsym_package.as_container.data_tar.as_container.lookup_file(
-            debug_file_path
+        debug_file = (
+            dbgsym_package.as_container.data_tar.as_container.lookup_file(
+                debug_file_path
+            )
         )
         if not debug_file:
             logger.debug(
