@@ -265,12 +265,13 @@ class ReadelfDynamic(Readelf):
     def init_regex(self):
         self._addr_re = re.compile(rb"0x[0-9a-f]+")
         self._size_re = re.compile(rb"[0-9]+ \(bytes\)")
+        self._date_re = re.compile(rb"(\s+\(GNU_PRELINKED\)\s+) \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}")
 
     def filter_stdout(self, line):
-        # Remove sizes (no need to call super as this takes care or more)
+        # Remove sizes (no need to call super as this takes care of more)
         line = self._addr_re.sub(b"", line)
-        return self._size_re.sub(b"X (bytes)", line)
-
+        line = self._size_re.sub(b"X (bytes)", line)
+        return self._date_re.sub(rb"\1XXXX-XX-XXTXX:XX:XX", line)
 
 class ReadelfNotes(Readelf):
     def readelf_options(self):
@@ -447,7 +448,7 @@ READELF_COMMANDS = (
     ReadelfProgramHeader,
     # ReadelfSections,
     # ReadelfSymbols,
-    ReadelfRelocs,
+    # ReadelfRelocs,
     ReadelfDynamic,
     # ReadelfNotes,
     # ReadelfVersionInfo
@@ -483,6 +484,7 @@ IGNORE_SECTIONS = [
     ".gnu.prelink_undo",
     ".note.gnu.build-id",
     ".data",
+    ".sdata",
     ".rodata",
     ".rodata.str1.4",
     ".data.rel.ro",
