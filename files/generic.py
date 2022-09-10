@@ -1,3 +1,19 @@
+"""
+Copyright (C) 2020 Airbus
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import os
 import re
 import tlsh
@@ -51,11 +67,11 @@ class UnpackedFile:
 
     @classmethod
     @Profiler.profilable
-    def recognizes(self, file_type: dict):
+    def recognizes(cls, file_type: dict):
         """
         Whether this class can be used to analyze files with the given type
         """
-        return self.recognize_regex.match(file_type["full"])
+        return cls.recognize_regex.match(file_type["full"])
 
     def has_same_content_as(self, other):
         """

@@ -1,6 +1,21 @@
 #!/usr/bin/env python3
 """
 Parse the output of the script and feed it to diffoscope
+
+Copyright (C) 2020 Airbus
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
 import sys
@@ -24,16 +39,24 @@ def _hardlink_file(file, dir, prefix=""):
     dst = _get_file_output_path(file, dir, prefix)
 
     # Copy the file to the matching place in the tmp dir so hierachy is kept
-    os.makedirs(dst.parent, exist_ok=True)
-    os.link(file, dst)
+    try:
+        os.makedirs(dst.parent, exist_ok=True)
+        os.link(file, dst)
+    except FileExistsError:
+        # This file was already copied, don't do it again
+        pass
 
 
 def _copy_file(file, dir, prefix=""):
     dst = _get_file_output_path(file, dir, prefix)
 
     # Copy the file to the matching place in the tmp dir so hierachy is kept
-    os.makedirs(dst.parent, exist_ok=True)
-    shutil.copy(file, dst)
+    try:
+        os.makedirs(dst.parent, exist_ok=True)
+        shutil.copy(file, dst)
+    except shutil.SameFileError:
+        # This file was already copied, don't do it again
+        pass
 
 
 def _get_path(line):
@@ -43,19 +66,15 @@ def _get_path(line):
 
 
 def _get_pair(lines):
-    if len(lines) > 1:
-        # A file was modified
-        file1 = _get_path(lines[0])
+    line = lines[0]
+    file1 = _get_path(line)
+    if line.startswith("Added:"):
+        return (None, file1)
+    elif line.startswith("Removed:"):
+        return (file1, None)
+    else:
         file2 = _get_path(lines[1])
         return (file1, file2)
-
-    # A file was added or removed
-    line = lines[0]
-    file = _get_path(line)
-    if line.startswith("Added"):
-        return (None, file)
-    else:
-        return (file, None)
 
 
 def _parse_diff(diff):
@@ -83,8 +102,8 @@ def parse_file(file_path):
 
 
 def create_tmp_dirs():
-    tmp1 = tempfile.TemporaryDirectory(prefix="difftool_")
-    tmp2 = tempfile.TemporaryDirectory(prefix="difftool_")
+    tmp1 = tempfile.TemporaryDirectory(prefix="diffware_")
+    tmp2 = tempfile.TemporaryDirectory(prefix="diffware_")
     return tmp1, tmp2
 
 
@@ -131,9 +150,9 @@ def call_diffoscope(dir1, dir2, args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Wrapper to run diffoscope on the output of difftool")
-    parser.add_argument("difftool_args", nargs="*")
-    parser.add_argument("FILE_PATH", type=str, help="Path to file created by running difftool")
+    parser = argparse.ArgumentParser(description="Wrapper to run diffoscope on the output of diffware")
+    parser.add_argument("diffware_args", nargs="*")
+    parser.add_argument("FILE_PATH", type=str, help="Path to file created by running diffware")
 
     # We only parse the second argument (the first being the name of the script)
     # since the other will be used for diffoscope

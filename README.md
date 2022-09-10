@@ -1,6 +1,16 @@
-# Difftool
+# Diffware
 
-The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and it can be combined with tools like [diffoscope](https://diffoscope.org).
+The goal of this tool is to provide a summary of the changes between two files or directories. It can be extensively configured to keep only the changes that matter to you, and be combined with tools like [diffoscope](https://diffoscope.org) to dive into those differences.
+
+<p float="left" align="center">
+  <img alt="Diffware CLI example" src="doc/diffware_screenshot.png" width="49%"/>
+  <img alt="Diffoscope example" src="doc/diffware_diffoscope_screenshot.png" width="49%"/>
+  Example usage of diffware combined with diffoscope
+</p>
+
+<br/>
+
+Checkout [this file](doc/blogpost.md) for a use-case example and an overview of the tool's capabilities.
 
 ## Table of content
 
@@ -9,21 +19,23 @@ The goal of this tool is to provide a summary of the changes between two files o
 3. [Configuration](#configuration)
 4. [Optimizing](#optimizing)
 5. [Tools](#tools)
-6. [Example](#example)
+6. [Examples](#examples)
 
 ## Installing
+
+Python 3.8 or newer is recommended.
 
 ### Minimal
 
 The minimal install doesn't allow for automatic file extraction, but can work on already extracted files and directories.
 
-`argcomplete` is used to provide autocompletion, if possible:
+Install requirements available through pip:
 
 ```bash
-pip3 install argcomplete
+pip3 install -r requirements.txt
 ```
 
-`fact_helper_file` provides filemagick and config parsing helpers:
+`fact_helper_file` provides [filemagick](https://pypi.org/project/python-magic/) with custom signatures and config parsing helpers:
 
 ```bash
 git clone https://github.com/fkie-cad/fact_helper_file.git
@@ -31,44 +43,37 @@ cd fact_helper_file
 pip3 install .
 ```
 
-`tlsh` enables to compute distances between files and identify moved files:
-
-```bash
-pip3 install tlsh
-```
-
 All that is left is to clone this repository:
 
 ```bash
-git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
-cd ~/difftool
+git clone https://github.com/airbus-seclab/diffware.git ~/diffware
+cd ~/diffware
 ```
-
 
 ### Full
 
 The full install adds an automatic extraction tool.
 
-Install `fact_extractor` from [this branch](https://github.com/JRomainG/fact_extractor/tree/dev):
+Install [fact_extractor](https://github.com/fkie-cad/fact_extractor):
 
 ```bash
-git clone https://github.com/JRomainG/fact_extractor.git ~/fact_extractor
+git clone https://github.com/fkie-cad/fact_extractor.git ~/fact_extractor
 cd ~/fact_extractor
 fact_extractor/install/pre_install.sh
 fact_extractor/install.py
 ```
 
-Make sure the `tlsh` and `argcomplete` are installed:
+Make sure the pip requirements are installed:
 
 ```bash
-pip3 install tlsh argcomplete
+pip3 install -r requirements.txt
 ```
 
 Finally, clone this repository:
 
 ```bash
-git clone https://github.com/airbus-seclab/Difftool.git ~/difftool
-cd ~/difftool
+git clone https://github.com/airbus-seclab/Diffware.git ~/diffware
+cd ~/diffware
 ```
 
 ## Usage
@@ -209,15 +214,17 @@ The output of this script can be parsed to run [diffoscope](https://diffoscope.o
 
 Any option other than the path to the file will be passed to `diffoscope`. When possible, the modified files won't be copied, but a hardlink will be created in a temporary folder.
 
-## Example
+## Examples
 
-Here's an example of using the tool to find the differences between two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful example of how this tool can be used.
+### OpenWRT
+
+Let's say we want to find out what changes have been made between two firmware versions, to know if some features have been added or some vulnerabilities have been patched. In this example, we'll work with two releases of [OpenWRT](https://openwrt.org/). Though the source code is [publicly available](https://github.com/openwrt/openwrt), it serves as a useful illustration of how this tool can be used.
 
 Here's the result of comparing the `rootfs-squashfs.img.gz` of versions [19.07.2](https://downloads.openwrt.org/releases/19.07.2/targets/x86/64/) and [19.07.3](https://downloads.openwrt.org/releases/19.07.3/targets/x86/64/) for the x86-64 architecture:
 
 ```bash
 $ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs.img.gz ~/openwrt-19.07.3-x86-64-rootfs-squashfs.img.gz --output /dev/null
-[WARNING] Found 1949 files with different paths (and 0 with similar paths), looking for moved files may take a while. Did a folder name change?
+[WARNING] Found 2250 files with different paths (and 0 with similar paths), looking for moved files may take a while. Did a folder name change?                                               
 ```
 
 As you can see, the files have been decompressed and the squashfs filesystem read automatically by [fact_extractor](https://github.com/fkie-cad/fact_extractor). The extracted files should be available in `/tmp/extractor1/files` and `/tmp/extractor2/files`. However, a warning shows that no files with similar paths have been found.
@@ -228,21 +235,21 @@ This is because the folder extracted from the archive contains the version numbe
 $ mv /tmp/extractor1/files/openwrt-19.07.2-x86-64-rootfs-squashfs.img_extracted ~/openwrt-19.07.2-x86-64-rootfs-squashfs
 $ mv /tmp/extractor2/files/openwrt-19.07.3-x86-64-rootfs-squashfs.img_extracted ~/openwrt-19.07.3-x86-64-rootfs-squashfs
 $ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract
-Found 12 added files, 28 removed files and 239 changed files (279 files in total)
+Found 9 added files, 0 removed files and 267 changed files (276 files in total)
 ```
 
 Much better! When looking at the output, we notice quite a few images, which we'd like to exclude. We can run the script again:
 
 ```bash
 $ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime "image/*"
-Found 12 added files, 9 removed files and 232 changed files (253 files in total)
+Found 10 added files, 0 removed files and 241 changed files (251 files in total)
 ```
 
 Once again, better. There are some changes related to package versions, we can also decide to exclude them:
 
 ```bash
 $ ./main.py ~/openwrt-19.07.2-x86-64-rootfs-squashfs ~/openwrt-19.07.3-x86-64-rootfs-squashfs --no-extract --exclude-mime "image/*" --exclude "*.control"
-Found 12 added files, 9 removed files and 125 changed files (146 files in total)
+Found 10 added files, 0 removed files and 134 changed files (144 files in total)
 ```
 
 Now that we're happy with the output, we can save it to a file and run [diffoscope](https://diffoscope.org/) to dive into the changes:
@@ -254,4 +261,12 @@ $ ./tools/diffoscope.py ~/openwrt-19.07.2_vs_19.07.3.diff --html-dir ~/openwrt-d
 
 **Note:** The `--exclude-command` option of diffoscope is not mandatory, but it makes the output less noisy. `--diff-mask` can also prove quite useful to ignore versions strings or dates for example.
 
-These options can then be saved to a configuration file and later reused for other versions of OpenWRT so this work doesn't have to be done each time.
+
+In the end, we have obtained:
+* A list of files containing only the differences that matter to our use-case,
+* A quicker look at their content by running diffoscope on this script's output,
+* A set of options that can be turned into a config file and later reused for other versions of OpenWRT so this work doesn't have to be done each time.
+
+### FRRouting
+
+A use case example can be found in [the doc folder](doc/blogpost.md). It shows how to use both this tool and [diffoscope](https://diffoscope.org) to identify a vulnerability fix in an upgrade.

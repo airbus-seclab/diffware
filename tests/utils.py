@@ -14,15 +14,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-# The `files` folder contains classes used to represent specialized files,
-# as well as classes needed to analyze their contents
-from . import elf, symlink
+from helpers.config import Config
+from helpers.logger import Logger
+from helpers.runner import Runner
 
 
-# Order matters: file type recognition is called in order
-# No need to add generic.UnpackedFile as all files are instances of this class
-# by default
-FILE_TYPES = [
-    elf.ElfFile,
-    symlink.SymlinkFile
-]
+def get_files(config, path1, path2):
+    runner = Runner(config)
+    files1, files2, _, _ = runner.get_extracted_files(path1, path2)
+    return list(files1), list(files2)
+
+
+def make_config():
+    config = Config()
+    Logger.setup_logging(progress=False, output_file="/dev/null")
+    return config

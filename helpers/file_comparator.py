@@ -1,3 +1,19 @@
+"""
+Copyright (C) 2020 Airbus
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import os
 import tempfile
 import subprocess
@@ -11,7 +27,7 @@ class FileComparator:
     Class comparing two given files, and handling temporary file paths generated
     for this comparison
     """
-    TMP_DIR = tempfile.TemporaryDirectory(prefix="difftool_")
+    TMP_DIR = tempfile.TemporaryDirectory(prefix="diffware_")
 
     @staticmethod
     def are_equal(file1, file2):
@@ -50,13 +66,13 @@ class FileComparator:
         ) == 0
 
     @classmethod
-    def tmp_file_path(self):
+    def tmp_file_path(cls):
         """
         Used to create a temporary file that should be cleaned up after the
         script is done (remember to call cleanup)
         """
-        return tempfile.mktemp(dir=self.TMP_DIR.name)
+        return tempfile.mktemp(dir=cls.TMP_DIR.name)
 
     @classmethod
-    def cleanup(self):
-        self.TMP_DIR.cleanup()
+    def cleanup(cls):
+        cls.TMP_DIR.cleanup()

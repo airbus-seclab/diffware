@@ -1,3 +1,19 @@
+"""
+Copyright (C) 2020 Airbus
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import sys
 import pathlib
 import argparse
@@ -57,16 +73,23 @@ class Config(ConfigParser):
         }
     }
 
-    def __init__(self, arguments):
+    def __init__(self, arguments=None):
         super().__init__(self)
-        self.read(arguments.config_file)
+
+        if arguments:
+            config_file = arguments.config_file
+        else:
+            config_file = default_config_path()
+
+        self.read(config_file)
         self._merge(arguments)
 
     def _merge(self, arguments):
         """
         Merge options passed through arguments and in config file
         """
-        args = vars(arguments)
+        args = vars(arguments) if arguments else {}
+
         for section, values in self.__sections.items():
             for key in values.keys():
                 arg_value = args.get(key, None)
@@ -121,7 +144,7 @@ class Config(ConfigParser):
 
 
 def make_config():
-    arguments = setup_argparser("difftool", "Shallow firmware diffing tool", sys.argv)
+    arguments = setup_argparser("Diffware", "Shallow firmware diffing tool", sys.argv)
     config = Config(arguments)
     Logger.setup_logging(debug=config.debug, progress=config.show_progress, log_level=config.log_level, output_file=config.data_file)
 

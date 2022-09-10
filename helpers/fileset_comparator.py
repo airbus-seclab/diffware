@@ -1,3 +1,19 @@
+"""
+Copyright (C) 2020 Airbus
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 import random
 import operator
 import multiprocessing
@@ -159,6 +175,11 @@ class FilesetComparator:
         Logger.progress("Finding new files...")
         return self._specialize(self.file_set2 - self._common_files)
 
+    @classmethod
+    def _files_classes_match(cls, file1, file2):
+        # Classes should be the same
+        return file1.__class__ == file2.__class__
+
     def _match_file(self, file, file_set=None):
         """
         Match the given file with another file from the given set, if they
@@ -176,6 +197,8 @@ class FilesetComparator:
 
         comparisons = []
         for f in file_set:
+            if not self._files_classes_match(file, f):
+                continue
             score = type(self).compute_distance(file, f)
             comparisons.append((score, f))
 
