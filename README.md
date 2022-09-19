@@ -29,25 +29,25 @@ Python 3.8 or newer is recommended.
 
 The minimal install doesn't allow for automatic file extraction, but can work on already extracted files and directories.
 
-Install requirements available through pip:
+Simply setup a virtual environments and install requirements through pip:
 
 ```bash
-pip3 install -r requirements.txt
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
-`fact_helper_file` provides [filemagick](https://pypi.org/project/python-magic/) with custom signatures and config parsing helpers:
+### Extended signatures
+
+Optionally, you can install `fact_helper_file`, which provides [filemagick](https://pypi.org/project/python-magic/) with custom signatures.
+If available, this module will be used instead of `python-magic`.
+
+Install the latest version from Github:
 
 ```bash
 git clone https://github.com/fkie-cad/fact_helper_file.git
 cd fact_helper_file
 pip3 install .
-```
-
-All that is left is to clone this repository:
-
-```bash
-git clone https://github.com/airbus-seclab/diffware.git ~/diffware
-cd ~/diffware
 ```
 
 ### Full
@@ -63,17 +63,12 @@ fact_extractor/install/pre_install.sh
 fact_extractor/install.py
 ```
 
-Make sure the pip requirements are installed:
+Then, setup a virtual environments and install requirements through pip:
 
 ```bash
-pip3 install -r requirements.txt
-```
-
-Finally, clone this repository:
-
-```bash
-git clone https://github.com/airbus-seclab/Diffware.git ~/diffware
-cd ~/diffware
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 ```
 
 ## Usage
