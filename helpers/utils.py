@@ -19,10 +19,15 @@ import tlsh
 import signal
 import pathlib
 import subprocess
-from functools import wraps
 from configparser import NoOptionError, NoSectionError
 
-from fact_helper_file import get_file_type_from_path
+try:
+    from fact_helper_file import get_file_type_from_path
+    FACT_FOUND = True
+except ImportError:
+    # Fallback to python-magic
+    FACT_FOUND = False
+    from magic import from_file as _magic_from_file
 
 from .logger import Logger
 
@@ -46,7 +51,13 @@ def get_file_type(path):
     if path.is_socket():
         return {"mime": "inode/socket", "full": "socket"}
 
-    return get_file_type_from_path(path)
+    if FACT_FOUND:
+        return get_file_type_from_path(path)
+    else:
+        return {
+            "mime": _magic_from_file(path, mime=True),
+            "full": _magic_from_file(path, mime=False),
+        }
 
 
 def get_file_size(path, default=0):
