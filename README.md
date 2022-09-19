@@ -195,7 +195,7 @@ You can also tweak the `blacklist` option from the config file to prevent unpack
 
 ### Saving time for moved detection
 
-If folders have been renamed (apart from the root file), try renaming them so the overall hierarchy of both files match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
+If folders have been renamed (apart from the root file), try renaming them back to their old name so the overall hierarchy of both files match. Otherwise, many files will have to be compared to attempt to detect the ones that have been moved.
 
 ## Tools
 
@@ -208,6 +208,8 @@ The output of this script can be parsed to run [diffoscope](https://diffoscope.o
 ```
 
 Any option other than the path to the file will be passed to `diffoscope`. When possible, the modified files won't be copied, but a hardlink will be created in a temporary folder.
+
+You can also use the `elf.py` and `decompile.py` files from the [tools folder](./tools) with recent versions of diffoscope to reduce noise in the comparisons.
 
 ## Examples
 
