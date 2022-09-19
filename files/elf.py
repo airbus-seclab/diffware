@@ -16,10 +16,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 import os
 import re
-import tlsh
 import itertools
 import subprocess
-import collections
 from functools import cached_property
 
 from .generic import UnpackedFile

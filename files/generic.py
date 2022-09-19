@@ -14,16 +14,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
-import os
 import re
-import tlsh
 from functools import cached_property
 
 from helpers.profiler import Profiler
 from helpers.file_comparator import FileComparator
 from helpers.utils import (
     get_file_type,
-    get_file_size,
     read_timeout,
     compute_fuzzy_hash
 )

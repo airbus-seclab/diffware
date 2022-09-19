@@ -17,7 +17,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import sys
 import shutil
-import logging
 import pathlib
 import fnmatch
 from copy import deepcopy
@@ -37,8 +36,6 @@ except ModuleNotFoundError:
 
 import files
 from .logger import Logger
-from .file_comparator import FileComparator
-from .fileset_comparator import FilesetComparator
 from .utils import get_file_type, read_list_from_config
 
 

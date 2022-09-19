@@ -17,7 +17,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import pytest
 
 from .utils import get_files, make_config
-from helpers.config import Config
 
 
 @pytest.fixture
